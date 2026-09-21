@@ -1,54 +1,76 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { urlFor } from '@/lib/sanity'
 
-// Phân loại độ hiếm & Trọng số xuất hiện (Rarity Weight)
+// Chuẩn hóa tiếng Việt để nhận diện Tag
 function removeVietnameseTones(str) {
+  if (!str) return ''
   return str
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/đ/g, 'd')
     .replace(/Đ/g, 'D')
     .toLowerCase()
-    .replace(/\s+/g, '') // Xóa khoảng trắng
+    .replace(/\s+/g, '')
 }
 
 function getRarityInfo(tags = []) {
-  // Chuyển toàn bộ tags về dạng không dấu, viết thường, không khoảng trắng
   const normalizedTags = tags.map(t => removeVietnameseTones(t))
 
-  const isSSR = normalizedTags.some(t => 
-    ['laudich', 'haisan', 'cuacamau', 'denui', 'tiec', 'xaxi'].includes(t)
+  const isUR = normalizedTags.some(t =>
+    ['hiem', 'hiemco', 'khotim', 'docla', 'thuonghang', 'hiemco'].includes(t)
   )
-  const isSR = normalizedTags.some(t => 
-    ['dacsan', 'anchoi', 'banhxeo', 'bundau'].includes(t)
+  const isSSR = normalizedTags.some(t =>
+    [ 'haisan', 'lehoi', 'damdo', 'tiec', 'xaxi'].includes(t)
+  )
+  const isSR = normalizedTags.some(t =>
+    ['dacsan', 'anchoi', 'moinhau', 'haocom'].includes(t)
   )
 
+  if (isUR) {
+    return {
+      tier: 'UR',
+      label: 'UR - Món Hiếm 👑',
+      border: 'border-pink-500 shadow-pink-500/50',
+      bg: 'bg-gradient-to-b from-pink-500/20 to-red-600/30',
+      badge: 'bg-pink-600 text-white font-extrabold animate-pulse',
+      weight: 1
+    }
+  }
   if (isSSR) {
     return {
-      label: 'SSR - Món Đã Tay / Ít Ăn 💎',
-      color: 'bg-purple-100 text-purple-800 border-purple-300',
-      weight: 1
+      tier: 'SSR',
+      label: 'SSR - Xa Xỉ 💎',
+      border: 'border-purple-500 shadow-purple-500/50',
+      bg: 'bg-gradient-to-b from-purple-500/20 to-indigo-600/30',
+      badge: 'bg-purple-600 text-white font-bold',
+      weight: 2
     }
   }
   if (isSR) {
     return {
-      label: 'SR - Đặc Sản / Ăn Chơi 🌟',
-      color: 'bg-amber-100 text-amber-800 border-amber-300',
-      weight: 3
+      tier: 'SR',
+      label: 'SR - Đặc Sản 🌟',
+      border: 'border-amber-400 shadow-amber-400/50',
+      bg: 'bg-gradient-to-b from-amber-400/20 to-orange-500/30',
+      badge: 'bg-amber-500 text-white font-bold',
+      weight: 4
     }
   }
   return {
-    label: 'R - Món Quốc Dân / Quốc Hồn 🥣',
-    color: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    weight: 6
+    tier: 'R',
+    label: 'R - Bữa Cơm 🥣',
+    border: 'border-emerald-400 shadow-emerald-400/30',
+    bg: 'bg-gradient-to-b from-emerald-400/10 to-teal-500/20',
+    badge: 'bg-emerald-600 text-white font-medium',
+    weight: 8
   }
 }
 
-// Thuật toán chọn món theo trọng số tỉ lệ (Weighted Random Selection)
+// Thuật toán chọn món theo trọng số
 function selectWeightedRandomDish(dishes) {
   const weightedList = []
   dishes.forEach((dish) => {
@@ -57,150 +79,184 @@ function selectWeightedRandomDish(dishes) {
       weightedList.push(dish)
     }
   })
-  const randomIndex = Math.floor(Math.random() * weightedList.length)
-  return weightedList[randomIndex]
+  return weightedList[Math.floor(Math.random() * weightedList.length)]
 }
 
 export default function RandomDishModal({ dishes }) {
   const [isOpen, setIsOpen] = useState(false)
   const [isSpinning, setIsSpinning] = useState(false)
-  const [selectedDish, setSelectedDish] = useState(null)
-  const [spinPhase, setSpinPhase] = useState('FAST') // FAST -> SLOWING -> WIN
+  const [stripDishes, setStripDishes] = useState([])
+  const [winningDish, setWinningDish] = useState(null)
+  const stripRef = useRef(null)
 
-  const handleSpin = () => {
+  const handleOpenAndSpin = () => {
     if (!dishes || dishes.length === 0) return
+    setIsOpen(true)
+    startCS2Spin()
+  }
+
+  const startCS2Spin = () => {
+    if (isSpinning || !dishes || dishes.length === 0) return
 
     setIsSpinning(true)
-    setSpinPhase('FAST')
+    setWinningDish(null)
 
-    // Chốt kết quả trước theo thuật toán trọng số tỉ lệ
-    const finalWinner = selectWeightedRandomDish(dishes)
+    // 1. Chốt món trúng thưởng
+    const winner = selectWeightedRandomDish(dishes)
 
-    let currentDelay = 50 // Tốc độ khởi đầu (siêu nhanh - 50ms/lần)
-    let totalSteps = 0
-    const maxSteps = 25 // Tổng số lần nhảy món
-
-    const runSpinStep = () => {
-      // Chọn ngẫu nhiên 1 món để hiển thị hiệu ứng xáo trộn
-      const randomTempDish = dishes[Math.floor(Math.random() * dishes.length)]
-      setSelectedDish(randomTempDish)
-      totalSteps++
-
-      if (totalSteps > 15) {
-        setSpinPhase('SLOWING') // Giai đoạn chậm dần gây hồi hộp
-        currentDelay += 40 // Tăng thời gian chờ giữa mỗi nhịp
+    // 2. Tạo dải băng 45 món (vị trí index 35 là món chiến thắng)
+    const generatedStrip = []
+    for (let i = 0; i < 45; i++) {
+      if (i === 35) {
+        generatedStrip.push(winner)
       } else {
-        currentDelay += 5
-      }
-
-      if (totalSteps < maxSteps) {
-        setTimeout(runSpinStep, currentDelay)
-      } else {
-        // Chốt món được chọn cuối cùng
-        setSelectedDish(finalWinner)
-        setIsSpinning(false)
-        setSpinPhase('WIN')
+        const randomDish = dishes[Math.floor(Math.random() * dishes.length)]
+        generatedStrip.push(randomDish)
       }
     }
+    setStripDishes(generatedStrip)
 
-    setTimeout(runSpinStep, currentDelay)
+    // Reset dải băng về vị trí ban đầu
+    if (stripRef.current) {
+      stripRef.current.style.transition = 'none'
+      stripRef.current.style.transform = 'translateX(0px)'
+    }
+
+    // 3. Kích hoạt Animation cuộn CS2 sau 100ms
+    setTimeout(() => {
+      if (!stripRef.current) return
+
+      // Mỗi thẻ rộng 130px (120px card + 10px gap)
+      // Vị trí dừng: Đưa card index 35 vào đúng giữa khung (offset khoảng 130 * 35) + khoảng lệch nhẹ ngẫu nhiên
+      const cardWidth = 130
+      const randomOffset = Math.floor(Math.random() * 80) - 40 // Tạo khoảng chênh lệch tự nhiên
+      const targetX = -(35 * cardWidth - 120 + randomOffset)
+
+      // Cấu hình Bezier Curve chuẩn CS2 (nhanh vút lúc đầu, chậm dần cực sâu về sau)
+      stripRef.current.style.transition = 'transform 6.5s cubic-bezier(0.1, 1, 0.1, 1)'
+      stripRef.current.style.transform = `translateX(${targetX}px)`
+
+      // Khi animation kết thúc sau 6.5 giây
+      setTimeout(() => {
+        setIsSpinning(false)
+        setWinningDish(winner)
+      }, 6500)
+    }, 100)
   }
 
   return (
     <>
-      {/* Nút Vòng Quay Nổi */}
+      {/* Nút bấm Mở Hòm Cứu Đói */}
       <button
-        onClick={() => {
-          setIsOpen(true)
-          handleSpin()
-        }}
-        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3 px-5 rounded-full shadow-lg border-2 border-white flex items-center gap-2 transition-all hover:scale-105 active:scale-95 animate-bounce"
+        onClick={handleOpenAndSpin}
+        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-red-600 via-amber-500 to-orange-500 hover:scale-105 text-white font-extrabold py-3.5 px-6 rounded-full shadow-2xl border-2 border-amber-300 flex items-center gap-2 transition-all active:scale-95 animate-bounce"
       >
-        <span className="text-xl">🎰</span>
-        <span>Hôm nay ăn gì?</span>
+        <span className="text-2xl">🧰</span>
+        <span className="tracking-wide">Mở Hòm Cứu Đói CS2</span>
       </button>
 
-      {/* Modal Popup Gacha */}
+      {/* Modal CS2 Case Opening */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-amber-200 shadow-2xl relative text-center overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg">
+          <div className="bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-6 max-w-xl w-full shadow-[0_0_50px_rgba(245,158,11,0.2)] relative text-center overflow-hidden">
             
-            {/* Nút đóng */}
+            {/* Nút Đóng */}
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg font-bold w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center transition-colors z-10"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center z-20"
             >
               ✕
             </button>
 
-            <h3 className="text-2xl font-extrabold text-amber-950 mb-1 flex items-center justify-center gap-2">
-              <span>🎰</span>
-              <span>Gacha Ẩm Thực</span>
-            </h3>
-            <p className="text-xs text-amber-800/80 mb-4">
-              {isSpinning
-                ? spinPhase === 'SLOWING'
-                  ? 'Sắp dừng rồi... Món gì đây?! 🫣'
-                  : 'Đang quay xáo trộn danh sách... ⚡'
-                : 'Chúc bạn ngon miệng với sự lựa chọn này! 🎉'}
-            </p>
+            {/* Title CS2 */}
+            <div className="mb-4">
+              <span className="text-xs font-mono text-amber-400 tracking-widest uppercase">CS2 CASE OPENING</span>
+              <h3 className="text-2xl font-black text-white tracking-wide uppercase drop-shadow">
+                Mở Hòm Ẩm Thực 3 Miền
+              </h3>
+            </div>
 
-            {/* Khung quay slot machine */}
-            <div className={`relative rounded-2xl p-4 border transition-all duration-300 min-h-[250px] flex flex-col items-center justify-center mb-5 ${
-              isSpinning 
-                ? 'bg-amber-100/50 border-amber-300 shadow-inner' 
-                : 'bg-gradient-to-b from-amber-50 to-orange-50/30 border-amber-200 shadow-md ring-4 ring-amber-400/20'
-            }`}>
+            {/* KHUNG CONVEYOR CS2 BELT */}
+            <div className="relative my-6 bg-slate-950/80 p-2 rounded-2xl border border-slate-800 overflow-hidden h-44 shadow-inner flex items-center">
+              
+              {/* Mũi tên định vị Vạch Đích (Center Indicator) */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-full bg-amber-500 z-10 shadow-[0_0_15px_#f59e0b]"></div>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20 text-amber-400 text-xs">▼</div>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 z-20 text-amber-400 text-xs">▲</div>
 
-              {selectedDish && (
-                <div className={`transition-all duration-100 ${
-                  isSpinning ? 'scale-95 opacity-80 blur-[0.3px]' : 'scale-100 opacity-100 animate-pulse-once'
-                }`}>
-                  
-                  {/* Ảnh món ăn có khung viền đổi màu */}
-                  <div className="relative w-36 h-36 mx-auto mb-3 rounded-2xl overflow-hidden border-4 border-white shadow-lg">
-                    {selectedDish.image && (
-                      <Image
-                        src={urlFor(selectedDish.image).url()}
-                        alt={selectedDish.title || 'Món ăn'}
-                        fill
-                        className="object-cover"
-                      />
-                    )}
-                  </div>
+              {/* Dải Băng Món Ăn Cuộn Ngang */}
+              <div
+                ref={stripRef}
+                className="flex gap-2.5 items-center absolute left-1/2"
+                style={{ willChange: 'transform' }}
+              >
+                {stripDishes.map((dish, index) => {
+                  const rarity = getRarityInfo(dish.tags)
+                  return (
+                    <div
+                      key={index}
+                      className={`w-[120px] h-[140px] shrink-0 rounded-xl border-2 p-2 flex flex-col items-center justify-between transition-all ${rarity.border} ${rarity.bg} shadow-md`}
+                    >
+                      <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/20 mt-1">
+                        {dish.image && (
+                          <Image
+                            src={urlFor(dish.image).url()}
+                            alt={dish.title || 'Món'}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
+                      </div>
+                      <span className="text-[11px] font-bold text-white truncate w-full px-1">
+                        {dish.title}
+                      </span>
+                      <span className={`text-[9px] px-2 py-0.5 rounded-full ${rarity.badge}`}>
+                        {rarity.tier}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
 
-                  {/* Tên món */}
-                  <h4 className="text-xl font-extrabold text-amber-950 line-clamp-1">
-                    {selectedDish.title}
+            {/* KẾT QUẢ VÀ NÚT XEM CÔNG THỨC */}
+            <div className="min-h-[90px] flex flex-col items-center justify-center">
+              {isSpinning && (
+                <p className="text-amber-400 text-sm font-mono animate-pulse">
+                  ⚡ Dải băng đang cuộn... Đang hồi hộp chờ kết quả!
+                </p>
+              )}
+
+              {winningDish && !isSpinning && (
+                <div className="animate-fade-in text-center">
+                  <div className="text-xs text-slate-400 uppercase font-mono mb-1">Món ăn trúng thưởng:</div>
+                  <h4 className="text-2xl font-black text-amber-300 mb-2">
+                    {winningDish.title}
                   </h4>
-
-                  {/* Nhãn Độ Hiếm & Tỉ Lệ */}
-                  <div className="mt-2 flex items-center justify-center gap-2 flex-wrap">
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${getRarityInfo(selectedDish.tags).color}`}>
-                      {getRarityInfo(selectedDish.tags).label}
-                    </span>
-                  </div>
+                  <span className={`inline-block text-xs px-3 py-1 rounded-full border mb-4 ${getRarityInfo(winningDish.tags).badge}`}>
+                    {getRarityInfo(winningDish.tags).label}
+                  </span>
                 </div>
               )}
             </div>
 
-            {/* Nút bấm thao tác */}
-            <div className="flex gap-2">
+            {/* CÁC NÚT THAO TÁC */}
+            <div className="flex gap-3 mt-2">
               <button
-                onClick={handleSpin}
+                onClick={startCS2Spin}
                 disabled={isSpinning}
-                className="flex-1 bg-gradient-to-r from-amber-100 to-orange-100 hover:from-amber-200 hover:to-orange-200 text-amber-900 font-bold py-3 px-4 rounded-2xl text-sm transition-all active:scale-95 disabled:opacity-50 border border-amber-200/80 shadow-sm"
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 font-bold py-3 px-4 rounded-xl text-sm transition-all disabled:opacity-50 active:scale-95 shadow-md"
               >
-                {isSpinning ? 'Đang quay...' : 'Quay lại 🔄'}
+                {isSpinning ? 'Đang mở hòm...' : 'Mở lại 🧰'}
               </button>
 
-              {selectedDish && !isSpinning && (
+              {winningDish && !isSpinning && (
                 <Link
-                  href={`/recipe/${typeof selectedDish.slug === 'string' ? selectedDish.slug : selectedDish.slug?.current || selectedDish._id}`}
+                  href={`/recipe/${typeof winningDish.slug === 'string' ? winningDish.slug : winningDish.slug?.current || winningDish._id}`}
                   onClick={() => setIsOpen(false)}
-                  className="flex-1 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold py-3 px-4 rounded-2xl text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1 active:scale-95"
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold py-3 px-4 rounded-xl text-sm transition-all shadow-lg flex items-center justify-center gap-1 active:scale-95"
                 >
-                  Xem công thức
+                  Xem công thức ngay ➔
                 </Link>
               )}
             </div>
