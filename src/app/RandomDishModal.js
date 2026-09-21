@@ -16,7 +16,6 @@ function removeVietnameseTones(str) {
     .replace(/\s+/g, '')
 }
 
-// Giữ nguyên chính xác bộ Tag của bạn
 function getRarityInfo(tags = []) {
   const normalizedTags = tags.map(t => removeVietnameseTones(t))
 
@@ -105,10 +104,10 @@ export default function RandomDishModal({ dishes }) {
     // 1. Chọn món trúng thưởng
     const winner = selectWeightedRandomDish(dishes)
 
-    // 2. Tạo danh sách 40 ô (vị trí 30 là ô trúng thưởng)
-    const TARGET_INDEX = 30
+    // 2. Tạo dải băng dài 55 ô (vị trí 42 là ô trúng thưởng)
+    const TARGET_INDEX = 42
     const generatedStrip = []
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 55; i++) {
       if (i === TARGET_INDEX) {
         generatedStrip.push(winner)
       } else {
@@ -124,30 +123,37 @@ export default function RandomDishModal({ dishes }) {
       stripRef.current.style.transform = 'translateX(0px)'
     }
 
-    // 3. Thuật toán căn tâm chính xác bằng DOM Element Real Position
+    // 3. Tính vị trí sát rìa đầy kịch tính
     setTimeout(() => {
       if (!stripRef.current || !containerRef.current) return
 
       const winnerCardNode = stripRef.current.children[TARGET_INDEX]
       if (!winnerCardNode) return
 
-      // Lấy vị trí thực tế của ô trúng thưởng so với đầu dải băng
       const cardLeftOffset = winnerCardNode.offsetLeft
       const cardWidth = winnerCardNode.offsetWidth
       const containerWidth = containerRef.current.clientWidth
 
-      // Công thức tính khoảng cách dịch chuyển để TÂM ô trùng TÂM khung chứa
-      const targetX = -(cardLeftOffset + cardWidth / 2 - containerWidth / 2)
+      // Khoảng dịch chuyển gốc đưa thẻ vào chính giữa
+      const exactCenterTargetX = -(cardLeftOffset + cardWidth / 2 - containerWidth / 2)
 
-      // Kích hoạt animation CS2
-      stripRef.current.style.transition = 'transform 5.5s cubic-bezier(0.08, 0.9, 0.1, 1)'
-      stripRef.current.style.transform = `translateX(${targetX}px)`
+      // Tạo điểm dừng suýt soát ngẫu nhiên:
+      // Tối đa lệch tới 40% bề rộng thẻ (sát mép vạch vàng, cách mép chuyển ô chỉ 2 - 10px)
+      const maxEdgeJitter = (cardWidth / 2) * 0.8
+      const isLeftOrRight = Math.random() > 0.5 ? 1 : -1
+      const edgeOffset = (Math.random() * (maxEdgeJitter - 10) + 10) * isLeftOrRight
 
-      // Khi kết thúc hiệu ứng
+      const finalTargetX = exactCenterTargetX + edgeOffset
+
+      // Đường cong Bezier kéo dài 8.5 giây, cực kỳ chậm ở đoạn cuối (0.05, 0.95, 0.05, 1)
+      stripRef.current.style.transition = 'transform 8.5s cubic-bezier(0.05, 0.95, 0.05, 1)'
+      stripRef.current.style.transform = `translateX(${finalTargetX}px)`
+
+      // Chốt kết quả sau 8.5 giây
       setTimeout(() => {
         setIsSpinning(false)
         setWinningDish(winner)
-      }, 5500)
+      }, 8500)
     }, 100)
   }
 
@@ -158,7 +164,7 @@ export default function RandomDishModal({ dishes }) {
         className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-red-600 via-amber-500 to-orange-500 hover:scale-105 text-white font-extrabold py-3.5 px-6 rounded-full shadow-2xl border-2 border-amber-300 flex items-center gap-2 transition-all active:scale-95 animate-bounce"
       >
         <span className="text-2xl">🧰</span>
-        <span className="tracking-wide">Mở Hòm Cứu Đói CS2</span>
+        <span className="tracking-wide">Mở Hòm Đồ Ăn Cứu Đói </span>
       </button>
 
       {isOpen && (
@@ -173,7 +179,7 @@ export default function RandomDishModal({ dishes }) {
             </button>
 
             <div className="mb-4">
-              <span className="text-xs font-mono text-amber-400 tracking-widest uppercase">CS2 CASE OPENING</span>
+              <span className="text-xs font-mono text-amber-400 tracking-widest uppercase">FOOD CASE OPENING</span>
               <h3 className="text-2xl font-black text-white tracking-wide uppercase drop-shadow">
                 Mở Hòm Ẩm Thực 3 Miền
               </h3>
@@ -184,7 +190,7 @@ export default function RandomDishModal({ dishes }) {
               ref={containerRef}
               className="relative my-6 bg-slate-950/80 p-2 rounded-2xl border border-slate-800 overflow-hidden h-44 shadow-inner flex items-center"
             >
-              {/* Mũi tên chỉ định ở tâm chính giữa */}
+              {/* Vạch vàng chính giữa */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-full bg-amber-500 z-10 shadow-[0_0_15px_#f59e0b]"></div>
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20 text-amber-400 text-xs">▼</div>
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 z-20 text-amber-400 text-xs">▲</div>
@@ -227,7 +233,7 @@ export default function RandomDishModal({ dishes }) {
             <div className="min-h-[90px] flex flex-col items-center justify-center">
               {isSpinning && (
                 <p className="text-amber-400 text-sm font-mono animate-pulse">
-                  ⚡ Dải băng đang cuộn... Đang chờ vạch vàng chốt món!
+                  ⚡ Đang trôi chậm dần... Hồi hộp chờ kết quả!
                 </p>
               )}
 
