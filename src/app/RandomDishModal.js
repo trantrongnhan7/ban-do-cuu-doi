@@ -124,23 +124,32 @@ export default function RandomDishModal({ dishes }) {
 
     // 3. Kích hoạt Animation cuộn CS2 sau 100ms
     setTimeout(() => {
-      if (!stripRef.current) return
+      if (!stripRef.current || !stripRef.current.parentElement) return
 
-      // Mỗi thẻ rộng 130px (120px card + 10px gap)
-      // Vị trí dừng: Đưa card index 35 vào đúng giữa khung (offset khoảng 130 * 35) + khoảng lệch nhẹ ngẫu nhiên
-      const cardWidth = 130
-      const randomOffset = Math.floor(Math.random() * 80) - 40 // Tạo khoảng chênh lệch tự nhiên
-      const targetX = -(35 * cardWidth - 120 + randomOffset)
+      const cardWidth = 120 // Chiều rộng 1 card món ăn (w-[120px])
+      const gap = 10 // Khoảng cách gap giữa các card (gap-2.5 = 10px)
+      const itemTotalWidth = cardWidth + gap // Tổng bề ngang 1 ô = 130px
 
-      // Cấu hình Bezier Curve chuẩn CS2 (nhanh vút lúc đầu, chậm dần cực sâu về sau)
-      stripRef.current.style.transition = 'transform 6.5s cubic-bezier(0.1, 1, 0.1, 1)'
+      // Lấy chiều rộng thực tế của khung chứa container
+      const containerWidth = stripRef.current.parentElement.clientWidth
+
+      // Công thức căn giữa chính xác ô thứ 35 vào vạch vàng trung tâm:
+      // Tọa độ X = -(35 * 130 + 120/2 - containerWidth/2)
+      const centerOffset = (35 * itemTotalWidth) + (cardWidth / 2) - (containerWidth / 2)
+      
+      // Thêm độ lệch nhẹ ngẫu nhiên trong phạm vi lòng thẻ (tránh vượt ra ngoài viền thẻ)
+      const randomJitter = Math.floor(Math.random() * 50) - 25
+      const targetX = -(centerOffset + randomJitter)
+
+      // Hiệu ứng cuộn CS2 mượt mà
+      stripRef.current.style.transition = 'transform 6s cubic-bezier(0.08, 0.9, 0.1, 1)'
       stripRef.current.style.transform = `translateX(${targetX}px)`
 
-      // Khi animation kết thúc sau 6.5 giây
+      // Chốt kết quả trùng khớp khi dừng hẳn
       setTimeout(() => {
         setIsSpinning(false)
         setWinningDish(winner)
-      }, 6500)
+      }, 6000)
     }, 100)
   }
 
@@ -152,7 +161,7 @@ export default function RandomDishModal({ dishes }) {
         className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-red-600 via-amber-500 to-orange-500 hover:scale-105 text-white font-extrabold py-3.5 px-6 rounded-full shadow-2xl border-2 border-amber-300 flex items-center gap-2 transition-all active:scale-95 animate-bounce"
       >
         <span className="text-2xl">🧰</span>
-        <span className="tracking-wide">Mở Hòm Cứu Đói CS2</span>
+        <span className="tracking-wide">Mở Hòm Cứu Đói </span>
       </button>
 
       {/* Modal CS2 Case Opening */}
