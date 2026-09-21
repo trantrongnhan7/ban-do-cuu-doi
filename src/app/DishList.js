@@ -4,8 +4,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
+import RandomDishModal from './RandomDishModal'
 
-export default function DishList({ dishes }) {
+export function DishList({ dishes }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('all')
 
@@ -154,6 +155,8 @@ export default function DishList({ dishes }) {
   </div>
         )}
       </section>
+      {/* Vòng quay ngẫu nhiên đặt cố định ở góc màn hình */}
+      <RandomDishModal dishes={dishes} />
     </main>
   )
 }

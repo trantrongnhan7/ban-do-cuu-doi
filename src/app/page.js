@@ -1,5 +1,5 @@
 import { client } from '@/lib/sanity'
-import DishList from './DishList'
+import { DishList } from './DishList'
 export const revalidate = 0;
 export default async function Home() {
   // Fetch dữ liệu từ Sanity ở Server
