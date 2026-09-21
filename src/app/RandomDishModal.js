@@ -5,7 +5,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { urlFor } from '@/lib/sanity'
 
-// Chuẩn hóa tiếng Việt để nhận diện Tag
 function removeVietnameseTones(str) {
   if (!str) return ''
   return str
@@ -17,6 +16,7 @@ function removeVietnameseTones(str) {
     .replace(/\s+/g, '')
 }
 
+// Giữ nguyên chính xác bộ Tag của bạn
 function getRarityInfo(tags = []) {
   const normalizedTags = tags.map(t => removeVietnameseTones(t))
 
@@ -24,7 +24,7 @@ function getRarityInfo(tags = []) {
     ['hiem', 'hiemco', 'khotim', 'docla', 'thuonghang', 'hiemco'].includes(t)
   )
   const isSSR = normalizedTags.some(t =>
-    [ 'haisan', 'lehoi', 'damdo', 'tiec', 'xaxi'].includes(t)
+    ['haisan', 'lehoi', 'damdo', 'tiec', 'xaxi'].includes(t)
   )
   const isSR = normalizedTags.some(t =>
     ['dacsan', 'anchoi', 'moinhau', 'haocom'].includes(t)
@@ -70,7 +70,6 @@ function getRarityInfo(tags = []) {
   }
 }
 
-// Thuật toán chọn món theo trọng số
 function selectWeightedRandomDish(dishes) {
   const weightedList = []
   dishes.forEach((dish) => {
@@ -87,6 +86,8 @@ export default function RandomDishModal({ dishes }) {
   const [isSpinning, setIsSpinning] = useState(false)
   const [stripDishes, setStripDishes] = useState([])
   const [winningDish, setWinningDish] = useState(null)
+  
+  const containerRef = useRef(null)
   const stripRef = useRef(null)
 
   const handleOpenAndSpin = () => {
@@ -101,13 +102,14 @@ export default function RandomDishModal({ dishes }) {
     setIsSpinning(true)
     setWinningDish(null)
 
-    // 1. Chốt món trúng thưởng
+    // 1. Chọn món trúng thưởng
     const winner = selectWeightedRandomDish(dishes)
 
-    // 2. Tạo dải băng 45 món (vị trí index 35 là món chiến thắng)
+    // 2. Tạo danh sách 40 ô (vị trí 30 là ô trúng thưởng)
+    const TARGET_INDEX = 30
     const generatedStrip = []
-    for (let i = 0; i < 45; i++) {
-      if (i === 35) {
+    for (let i = 0; i < 40; i++) {
+      if (i === TARGET_INDEX) {
         generatedStrip.push(winner)
       } else {
         const randomDish = dishes[Math.floor(Math.random() * dishes.length)]
@@ -116,60 +118,53 @@ export default function RandomDishModal({ dishes }) {
     }
     setStripDishes(generatedStrip)
 
-    // Reset dải băng về vị trí ban đầu
+    // Reset dải băng
     if (stripRef.current) {
       stripRef.current.style.transition = 'none'
       stripRef.current.style.transform = 'translateX(0px)'
     }
 
-    // 3. Kích hoạt Animation cuộn CS2 sau 100ms
+    // 3. Thuật toán căn tâm chính xác bằng DOM Element Real Position
     setTimeout(() => {
-      if (!stripRef.current || !stripRef.current.parentElement) return
+      if (!stripRef.current || !containerRef.current) return
 
-      const cardWidth = 120 // Chiều rộng 1 card món ăn (w-[120px])
-      const gap = 10 // Khoảng cách gap giữa các card (gap-2.5 = 10px)
-      const itemTotalWidth = cardWidth + gap // Tổng bề ngang 1 ô = 130px
+      const winnerCardNode = stripRef.current.children[TARGET_INDEX]
+      if (!winnerCardNode) return
 
-      // Lấy chiều rộng thực tế của khung chứa container
-      const containerWidth = stripRef.current.parentElement.clientWidth
+      // Lấy vị trí thực tế của ô trúng thưởng so với đầu dải băng
+      const cardLeftOffset = winnerCardNode.offsetLeft
+      const cardWidth = winnerCardNode.offsetWidth
+      const containerWidth = containerRef.current.clientWidth
 
-      // Công thức căn giữa chính xác ô thứ 35 vào vạch vàng trung tâm:
-      // Tọa độ X = -(35 * 130 + 120/2 - containerWidth/2)
-      const centerOffset = (35 * itemTotalWidth) + (cardWidth / 2) - (containerWidth / 2)
-      
-      // Thêm độ lệch nhẹ ngẫu nhiên trong phạm vi lòng thẻ (tránh vượt ra ngoài viền thẻ)
-      const randomJitter = Math.floor(Math.random() * 50) - 25
-      const targetX = -(centerOffset + randomJitter)
+      // Công thức tính khoảng cách dịch chuyển để TÂM ô trùng TÂM khung chứa
+      const targetX = -(cardLeftOffset + cardWidth / 2 - containerWidth / 2)
 
-      // Hiệu ứng cuộn CS2 mượt mà
-      stripRef.current.style.transition = 'transform 6s cubic-bezier(0.08, 0.9, 0.1, 1)'
+      // Kích hoạt animation CS2
+      stripRef.current.style.transition = 'transform 5.5s cubic-bezier(0.08, 0.9, 0.1, 1)'
       stripRef.current.style.transform = `translateX(${targetX}px)`
 
-      // Chốt kết quả trùng khớp khi dừng hẳn
+      // Khi kết thúc hiệu ứng
       setTimeout(() => {
         setIsSpinning(false)
         setWinningDish(winner)
-      }, 6000)
+      }, 5500)
     }, 100)
   }
 
   return (
     <>
-      {/* Nút bấm Mở Hòm Cứu Đói */}
       <button
         onClick={handleOpenAndSpin}
         className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-red-600 via-amber-500 to-orange-500 hover:scale-105 text-white font-extrabold py-3.5 px-6 rounded-full shadow-2xl border-2 border-amber-300 flex items-center gap-2 transition-all active:scale-95 animate-bounce"
       >
         <span className="text-2xl">🧰</span>
-        <span className="tracking-wide">Mở Hòm Cứu Đói </span>
+        <span className="tracking-wide">Mở Hòm Cứu Đói CS2</span>
       </button>
 
-      {/* Modal CS2 Case Opening */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg">
           <div className="bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-6 max-w-xl w-full shadow-[0_0_50px_rgba(245,158,11,0.2)] relative text-center overflow-hidden">
             
-            {/* Nút Đóng */}
             <button
               onClick={() => setIsOpen(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center z-20"
@@ -177,7 +172,6 @@ export default function RandomDishModal({ dishes }) {
               ✕
             </button>
 
-            {/* Title CS2 */}
             <div className="mb-4">
               <span className="text-xs font-mono text-amber-400 tracking-widest uppercase">CS2 CASE OPENING</span>
               <h3 className="text-2xl font-black text-white tracking-wide uppercase drop-shadow">
@@ -185,18 +179,20 @@ export default function RandomDishModal({ dishes }) {
               </h3>
             </div>
 
-            {/* KHUNG CONVEYOR CS2 BELT */}
-            <div className="relative my-6 bg-slate-950/80 p-2 rounded-2xl border border-slate-800 overflow-hidden h-44 shadow-inner flex items-center">
-              
-              {/* Mũi tên định vị Vạch Đích (Center Indicator) */}
+            {/* Container */}
+            <div 
+              ref={containerRef}
+              className="relative my-6 bg-slate-950/80 p-2 rounded-2xl border border-slate-800 overflow-hidden h-44 shadow-inner flex items-center"
+            >
+              {/* Mũi tên chỉ định ở tâm chính giữa */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-full bg-amber-500 z-10 shadow-[0_0_15px_#f59e0b]"></div>
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20 text-amber-400 text-xs">▼</div>
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 z-20 text-amber-400 text-xs">▲</div>
 
-              {/* Dải Băng Món Ăn Cuộn Ngang */}
+              {/* Dải Băng */}
               <div
                 ref={stripRef}
-                className="flex gap-2.5 items-center absolute left-1/2"
+                className="flex gap-2.5 items-center absolute left-0"
                 style={{ willChange: 'transform' }}
               >
                 {stripDishes.map((dish, index) => {
@@ -228,11 +224,10 @@ export default function RandomDishModal({ dishes }) {
               </div>
             </div>
 
-            {/* KẾT QUẢ VÀ NÚT XEM CÔNG THỨC */}
             <div className="min-h-[90px] flex flex-col items-center justify-center">
               {isSpinning && (
                 <p className="text-amber-400 text-sm font-mono animate-pulse">
-                  ⚡ Dải băng đang cuộn... Đang hồi hộp chờ kết quả!
+                  ⚡ Dải băng đang cuộn... Đang chờ vạch vàng chốt món!
                 </p>
               )}
 
@@ -249,7 +244,6 @@ export default function RandomDishModal({ dishes }) {
               )}
             </div>
 
-            {/* CÁC NÚT THAO TÁC */}
             <div className="flex gap-3 mt-2">
               <button
                 onClick={startCS2Spin}
