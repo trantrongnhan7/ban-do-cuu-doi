@@ -6,28 +6,45 @@ import Link from 'next/link'
 import { urlFor } from '@/lib/sanity'
 
 // Phân loại độ hiếm & Trọng số xuất hiện (Rarity Weight)
+function removeVietnameseTones(str) {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase()
+    .replace(/\s+/g, '') // Xóa khoảng trắng
+}
+
 function getRarityInfo(tags = []) {
-  const isSSR = tags.some(t => ['laudich', 'haisan', 'cuacamau', 'denui', 'tiec'].includes(t.toLowerCase()))
-  const isSR = tags.some(t => ['dacsan', 'anchoi', 'banhxeo', 'bundau'].includes(t.toLowerCase()))
+  // Chuyển toàn bộ tags về dạng không dấu, viết thường, không khoảng trắng
+  const normalizedTags = tags.map(t => removeVietnameseTones(t))
+
+  const isSSR = normalizedTags.some(t => 
+    ['laudich', 'haisan', 'cuacamau', 'denui', 'tiec', 'xaxi'].includes(t)
+  )
+  const isSR = normalizedTags.some(t => 
+    ['dacsan', 'anchoi', 'banhxeo', 'bundau'].includes(t)
+  )
 
   if (isSSR) {
     return {
       label: 'SSR - Món Đã Tay / Ít Ăn 💎',
       color: 'bg-purple-100 text-purple-800 border-purple-300',
-      weight: 1 // Tỉ lệ 1x (Hiếm)
+      weight: 1
     }
   }
   if (isSR) {
     return {
       label: 'SR - Đặc Sản / Ăn Chơi 🌟',
       color: 'bg-amber-100 text-amber-800 border-amber-300',
-      weight: 3 // Tỉ lệ 3x (Trung bình)
+      weight: 3
     }
   }
   return {
     label: 'R - Món Quốc Dân / Quốc Hồn 🥣',
     color: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    weight: 6 // Tỉ lệ 6x (Phổ biến nhất)
+    weight: 6
   }
 }
 
