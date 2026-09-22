@@ -1,56 +1,116 @@
-// Quản lý âm thanh kết hợp Web Audio API (cho tiếng tick) & MP3 CDN (cho tiếng thắng)
+// Khởi tạo AudioContext dùng chung
 let audioCtx = null
+
+const getAudioContext = () => {
+  if (typeof window === 'undefined') return null
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass()
+    }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume()
+  }
+  return audioCtx
+}
 
 export const playSound = (type) => {
   if (typeof window === 'undefined') return
 
-  // 1. Tiếng LẠCH CẠCH CS2 (Dùng Web Audio API - Siêu nhẹ, không lo trình duyệt chặn)
+  // 1. Tiếng "Lạch cạch" CS2 (Web Audio API)
   if (type === 'tick' || type === 'spin') {
     try {
-      if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext
-        audioCtx = new AudioContext()
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume()
-      }
+      const ctx = getAudioContext()
+      if (!ctx) return
 
-      const osc = audioCtx.createOscillator()
-      const gain = audioCtx.createGain()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
 
       osc.type = 'triangle'
-      osc.frequency.setValueAtTime(1200, audioCtx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.025)
+      osc.frequency.setValueAtTime(1200, ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.025)
 
-      gain.gain.setValueAtTime(0.18, audioCtx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.025)
+      gain.gain.setValueAtTime(0.18, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.025)
 
       osc.connect(gain)
-      gain.connect(audioCtx.destination)
+      gain.connect(ctx.destination)
 
       osc.start()
-      osc.stop(audioCtx.currentTime + 0.025)
+      osc.stop(ctx.currentTime + 0.025)
     } catch (e) {
       console.error(e)
     }
     return
   }
 
-  // 2. Tiếng CHÚC MỪNG PHÂN CẤP (Dùng MP3)
-  const soundUrls = {
-    win_sr: 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3',
-    win_ssr: 'https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3',
-    win_ur: 'https://assets.mixkit.co/active_storage/sfx/2020/2020-preview.mp3',
-  }
-
-  const url = soundUrls[type] || soundUrls['win_sr']
-
+  // 2. Tiếng CHÚC MỪNG PHÂN CẤP (Dùng Web Audio Synthesizer phát trực tiếp - Không bao giờ bị chặn/lỗi link MP3!)
   try {
-    const audio = new Audio(url)
-    audio.volume = 0.8
-    audio.currentTime = 0
-    audio.play().catch((err) => console.warn('Lỗi tự động phát:', err))
+    const ctx = getAudioContext()
+    if (!ctx) return
+
+    // 👑 Cấp UR: Fanfare Hoành Tráng
+    if (type === 'win_ur') {
+      const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98]
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+
+        osc.type = 'triangle'
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.08)
+
+        gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.08)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.6)
+
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+
+        osc.start(ctx.currentTime + i * 0.08)
+        osc.stop(ctx.currentTime + i * 0.08 + 0.6)
+      })
+    } 
+    // 💎 Cấp SSR: Hợp Âm Rực Rỡ
+    else if (type === 'win_ssr') {
+      const notes = [440, 554.37, 659.25, 880]
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.1)
+
+        gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.1)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.5)
+
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+
+        osc.start(ctx.currentTime + i * 0.1)
+        osc.stop(ctx.currentTime + i * 0.1 + 0.5)
+      })
+    } 
+    // 🥣 Cấp R & SR: Tiếng Chuông Bính Boong Vui Tươi
+    else {
+      const notes = [523.25, 659.25, 783.99, 1046.50]
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.1)
+
+        gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.1)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.4)
+
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+
+        osc.start(ctx.currentTime + i * 0.1)
+        osc.stop(ctx.currentTime + i * 0.1 + 0.4)
+      })
+    }
   } catch (e) {
-    console.error(e)
+    console.error('Lỗi phát tiếng chúc mừng:', e)
   }
 }
