@@ -74,7 +74,7 @@ export const getRarityInfo = (dish) => {
 function selectWeightedRandomDish(dishes) {
   const weightedList = []
   dishes.forEach((dish) => {
-    const rarity = getRarityInfo(dish.tags)
+    const rarity = getRarityInfo(dish)
     for (let i = 0; i < rarity.weight; i++) {
       weightedList.push(dish)
     }
@@ -209,7 +209,7 @@ export default function RandomDishModal({ dishes }) {
         setIsSpinning(false)
         setWinningDish(winner)
 
-        const rarity = getRarityInfo(winner.tags)
+        const rarity = getRarityInfo(winningDish)
 
         // 🔊 PHÁT ÂM THANH THEO THỨ TỰ TIER N -> R -> SR -> SSR
         if (rarity.tier === 'SSR') {
@@ -227,7 +227,7 @@ export default function RandomDishModal({ dishes }) {
     }, 100)
   }
 
-  const winningRarity = winningDish ? getRarityInfo(winningDish.tags) : null
+  const winningRarity = winningDish ? getRarityInfo(winningDish) : null
 
   return (
     <>
@@ -395,7 +395,7 @@ export default function RandomDishModal({ dishes }) {
                 </Link>
               )}
             </div>
-            // dòng này là để paste công cụ test gacha audio
+            {/*// dòng này là để paste công cụ test gacha audio*/}
             {/* 🧪 DEV TEST AUDIO BUTTONS (Chèn vào dòng 358) */}
             <div className="flex gap-2 mt-4 pt-3 border-t border-slate-800 text-xs justify-center">
               <span className="text-slate-500 font-mono self-center">Dev Test:</span>
