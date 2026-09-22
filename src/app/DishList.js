@@ -147,17 +147,6 @@ export function DishList({ dishes }) {
             />
           </div>
         </div>
-    
-
-        {/* Nội dung giữ nguyên font cũ của bạn */}
-        <div className="relative z-10 text-center">
-          <h1 className="font-[family-name:var(--font-playful)] text-3xl sm:text-5xl font-black text-amber-950 mb-2">
-            🥢 Bản Đồ Cứu Đói 🍜
-          </h1>
-          <p className="font-[family-name:var(--font-mono)] text-xs sm:text-sm text-amber-800 bg-amber-100/80 inline-block px-3 py-1 rounded-md border border-amber-200">
-            &gt; Bản đồ vị giác 3 miền: Lưu giữ hương vị xưa bằng góc nhìn mới_
-          </p>
-        </div>
       </header>
 
       {/* Thanh Tìm kiếm & Bộ lọc Vùng miền + Bookmark */}
