@@ -25,10 +25,10 @@ function getRarityInfo(tags = []) {
     ['hiem', 'hiemco', 'khotim', 'docla', 'thuonghang', 'xaxi'].includes(t)
   )
   const isSR = normalizedTags.some(t =>
-    ['haisan', 'lehoi', 'damdo', 'damtiec', 'dacsan'].includes(t)
+    ['haisan', 'lehoi', 'anchoi', 'moinhau'].includes(t)
   )
   const isR = normalizedTags.some(t =>
-    ['anchoi', 'moinhau', 'haocom'].includes(t)
+    ['damdo', 'damtiec', 'dacsan', 'haocom'].includes(t)
   )
 
   // 💎 1. TIER SSR (Siêu Phẩm / Cực Hiếm - Vàng Kim)
