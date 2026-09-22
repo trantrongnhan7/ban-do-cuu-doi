@@ -118,35 +118,15 @@ export function DishList({ dishes }) {
   })
 
   return (
-    <main className="min-h-screen bg-amber-50/50 py-12 px-4 sm:px-6 lg:px-8">
-      {/* KHỐI HEADER/BANNER CÓ BACKGROUND ẨM THỰC ĐƯỜNG PHỐ RIÊNG */}
-      <header className="relative max-w-4xl mx-auto mb-10 overflow-hidden rounded-3xl p-6 sm:p-8 border border-amber-200/80 shadow-sm bg-amber-100/60">
-        {/* Ảnh nền ẩm thực đường phố chìm riêng cho khối Banner */}
-        <div
-          className="absolute inset-0 opacity-20 pointer-events-none bg-cover bg-center mix-blend-multiply z-0"
-          style={{ backgroundImage: "url('/street-food-bg.jpg')" }}
-        />
+    <main className="relative min-h-screen bg-[#fbf8f2] py-12 px-4 sm:px-6 lg:px-8">
+      {/* NỀN ẢNH ẨM THỰC PHỦ TOÀN BỘ TRANG WEB (CỐ ĐỊNH KHI CUỘN) */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-10 bg-cover bg-center bg-fixed mix-blend-multiply z-0"
+        style={{ backgroundImage: "url('/dao-ly-son.png')" }}
+      />
 
-        {/* Nội dung Banner giữ nguyên */}
-        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-center sm:text-left">
-            <h1 className="font-[family-name:var(--font-playful)] text-3xl sm:text-5xl font-black text-amber-950 mb-2">
-              // Bản Đồ Vị Giác 🍜
-            </h1>
-            <p className="font-[family-name:var(--font-mono)] text-xs sm:text-sm text-amber-800 bg-amber-100/90 inline-block px-3 py-1 rounded-md border border-amber-200">
-              &gt; Bản đồ vị giác 3 miền: Lưu giữ hương vị xưa bằng góc nhìn mới_
-            </p>
-          </div>
-
-          {/* Logo Huy Hiệu góc phải */}
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full overflow-hidden border-2 border-amber-300 shadow-sm bg-white p-1 hidden sm:block">
-            <img
-              src="/hero-banner.jpg"
-              alt="Ẩm Thực Việt Nam"
-              className="w-full h-full object-cover rounded-full"
-            />
-          </div>
-        </div>
+      {/* KHỐI HEADER GIỮ NGUYÊN */}
+      <header className="relative max-w-4xl mx-auto mb-10 overflow-hidden rounded-3xl bg-amber-100/60 p-6 sm:p-8 border border-amber-200/80 shadow-xs z-10">
 
         <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Giữ nguyên màu chữ nâu mộc mạc cũ */}
