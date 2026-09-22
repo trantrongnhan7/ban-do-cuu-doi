@@ -246,8 +246,8 @@ export default function RandomDishModal({ dishes }) {
         onClick={handleOpenAndSpin}
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-gradient-to-r from-red-600 via-amber-500 to-orange-500 hover:scale-105 text-white font-extrabold py-2.5 px-4 sm:py-3.5 sm:px-6 rounded-full shadow-2xl border-2 border-amber-300 flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 animate-bounce text-xs sm:text-base"
       >
-        <span className="text-2xl">🧰</span>
-        <span className="tracking-wide">Mở Hòm Cứu Đói </span>
+        <span className="text-2xl">🎲</span>
+        <span className="tracking-wide">Hôm Nay ăn gì? </span>
       </button>
 
       {isOpen && (
