@@ -7,20 +7,8 @@ import Link from 'next/link'
 import { urlFor } from '@/lib/sanity'
 import confetti from 'canvas-confetti'
 
-function removeVietnameseTones(str) {
-  if (!str) return ''
-  return str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
-    .toLowerCase()
-    .replace(/\s+/g, '')
-}
-
 export const getRarityInfo = (dish) => {
-  // Ưu tiên đọc trường rarityTier trực tiếp từ Sanity Studio
-  // Nếu không có thì mới tìm trong mảng hashtags hoặc tags cũ
+  // Đọc Tier chuẩn từ Sanity Studio
   const tier =
     dish?.rarityTier ||
     (dish?.hashtags?.includes('SSR') || dish?.tags?.includes('SSR') ? 'SSR' :
@@ -35,8 +23,9 @@ export const getRarityInfo = (dish) => {
         border: 'border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.9)]',
         bg: 'bg-gradient-to-b from-amber-400/30 via-amber-500/40 to-orange-600/50',
         badge: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black animate-bounce shadow-lg',
-        glow: 'shadow-[0_0_60px_rgba(245,158,11,0.9)] ring-4 ring-amber-400',
-        weight: 1,
+        glow: 'border-amber-400 shadow-[0_0_60px_rgba(245,158,11,0.9)] ring-4 ring-amber-400',
+        sound: 'win_ssr',
+        weight: 1, // Tỉ lệ hiếm nhất (~5%)
       };
     case 'SR':
       return {
@@ -45,8 +34,9 @@ export const getRarityInfo = (dish) => {
         border: 'border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.7)]',
         bg: 'bg-gradient-to-b from-purple-500/30 to-indigo-600/40',
         badge: 'bg-purple-600 text-white font-bold shadow-md',
-        glow: 'shadow-[0_0_40px_rgba(168,85,247,0.6)] ring-2 ring-purple-500',
-        weight: 2,
+        glow: 'border-purple-500 shadow-[0_0_40px_rgba(168,85,247,0.6)] ring-2 ring-purple-500',
+        sound: 'win_sr',
+        weight: 3, // Tỉ lệ vừa (~15%)
       };
     case 'R':
       return {
@@ -55,8 +45,9 @@ export const getRarityInfo = (dish) => {
         border: 'border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]',
         bg: 'bg-gradient-to-b from-cyan-500/30 to-blue-600/40',
         badge: 'bg-cyan-600 text-white font-bold shadow-md',
-        glow: 'shadow-[0_0_30px_rgba(6,182,212,0.5)] ring-2 ring-cyan-400',
-        weight: 3,
+        glow: 'border-cyan-400 shadow-[0_0_30px_rgba(6,182,212,0.5)] ring-2 ring-cyan-400',
+        sound: 'win_r',
+        weight: 6, // Tỉ lệ phổ biến (~30%)
       };
     default:
       return {
@@ -65,13 +56,16 @@ export const getRarityInfo = (dish) => {
         border: 'border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]',
         bg: 'bg-gradient-to-b from-emerald-500/20 to-green-600/30',
         badge: 'bg-emerald-600 text-white font-bold shadow-sm',
-        glow: 'shadow-[0_0_20px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400',
-        weight: 4,
+        glow: 'border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400',
+        sound: 'win_n',
+        weight: 10, // Tỉ lệ cao nhất (~50%)
       };
   }
 };
 
+// Thuật toán quay Gacha theo đúng trọng số tỉ lệ chuẩn
 function selectWeightedRandomDish(dishes) {
+  if (!dishes || dishes.length === 0) return null
   const weightedList = []
   dishes.forEach((dish) => {
     const rarity = getRarityInfo(dish)
@@ -82,37 +76,28 @@ function selectWeightedRandomDish(dishes) {
   return weightedList[Math.floor(Math.random() * weightedList.length)]
 }
 
-// Bắn Pháo Hoa Kim Tuyến
+// Bắn Pháo Hoa Kim Tuyến Đồng Bộ Theo Tier
 function triggerConfetti(tier) {
   if (tier === 'SSR') {
-    // 💎 Pháo hoa Vàng Kim rực rỡ 3 đợt cho SSR
     const count = 200
     const defaults = { origin: { y: 0.6 } }
-
     function fire(particleRatio, opts) {
-      confetti({
-        ...defaults,
-        ...opts,
-        particleCount: Math.floor(count * particleRatio)
-      })
+      confetti({ ...defaults, ...opts, particleCount: Math.floor(count * particleRatio) })
     }
-
     fire(0.25, { spread: 26, startVelocity: 55, colors: ['#fbbf24', '#f59e0b', '#ffffff'] })
     fire(0.2, { spread: 60, colors: ['#d97706', '#fbbf24'] })
     fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 })
     fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, colors: ['#ffffff', '#fbbf24'] })
   } else if (tier === 'SR') {
-    // 🌟 Pháo hoa Tím Ánh Kim cho SR
     confetti({
-      particleCount: 100,
+      particleCount: 120,
       spread: 70,
       origin: { y: 0.6 },
       colors: ['#a855f7', '#c084fc', '#e9d5ff', '#ffffff']
     })
   } else if (tier === 'R') {
-    // 🔷 Pháo hoa Xanh Dương nhẹ cho R
     confetti({
-      particleCount: 50,
+      particleCount: 60,
       spread: 50,
       origin: { y: 0.6 },
       colors: ['#3b82f6', '#60a5fa', '#93c5fd']
@@ -186,7 +171,7 @@ export default function RandomDishModal({ dishes }) {
 
       const finalTargetX = exactCenterTargetX + edgeOffset
 
-      // 🔊 CHUỖI TIẾNG LẠCH CẠCH CHẬM DẦN CS2
+      // 🔊 TIẾNG LẠCH CẠCH CHẬM DẦN CS2
       let delay = 60
       let totalTime = 0
       const duration = 8500
@@ -209,77 +194,53 @@ export default function RandomDishModal({ dishes }) {
         setIsSpinning(false)
         setWinningDish(winner)
 
-        const rarity = getRarityInfo(winningDish)
+        // Lấy thông tin Rarity đồng bộ 100% từ món ăn chiến thắng
+        const rarity = getRarityInfo(winner)
 
-        // 🔊 PHÁT ÂM THANH THEO THỨ TỰ TIER N -> R -> SR -> SSR
-        if (rarity.tier === 'SSR') {
-          playSound('win_ssr')
-        } else if (rarity.tier === 'SR') {
-          playSound('win_sr')
-        } else if (rarity.tier === 'R') {
-          playSound('win_r')
-        } else {
-          playSound('win_n')
-        }
+        // 🔊 PHÁT ÂM THANH CHUẨN ĐỒNG BỘ
+        playSound(rarity.sound)
 
+        // 🎉 BẮN PHÁO HOA CHUẨN ĐỒNG BỘ
         triggerConfetti(rarity.tier)
       }, 8500)
     }, 100)
   }
 
+  // Lấy Rarity hiện tại của món trúng thưởng để render Hào Quang Modal
   const winningRarity = winningDish ? getRarityInfo(winningDish) : null
 
   return (
     <>
-      {/* 🎡 WIDGET BÁT MÌ + VÒNG QUAY CẦU CỒNG / ĐÈN LED NỔI BẬT */}
+      {/* 🎡 WIDGET BÁT MÌ + VÒNG QUAY */}
       <div className="fixed bottom-5 right-5 z-40 flex flex-col items-center">
-        
-        {/* Thẻ "Hôm Nay Ăn Gì?" đẩy tọa độ cao nhích lên hẳn để nhấp nháy không bị che */}
         <span className="mb-3 text-[10px] font-black uppercase tracking-wider text-amber-200 bg-gradient-to-r from-red-600 to-orange-600 px-3 py-1 rounded-full border border-amber-300 shadow-[0_0_15px_rgba(239,68,68,0.9)] animate-bounce z-20">
           🎲 Hôm Nay Ăn Gì?
         </span>
 
-        {/* Nút bấm chứa Vòng Quay Standee + Tô Mì */}
         <button
           onClick={handleOpenAndSpin}
           aria-label="Quay Món Ăn Gacha"
           className="group relative p-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-125 active:scale-95"
         >
-          {/* Lớp Hào Quang Neon nhấp nháy phía sau cùng */}
           <div className="absolute inset-0 rounded-full bg-amber-500/50 blur-xl group-hover:bg-red-500/80 transition-all duration-500 animate-pulse"></div>
 
-          {/* CONTAINER ĐỒNG BỘ NẢY (Cả Vòng Quay và Tô Mì nảy cùng nhịp) */}
           <div className="relative flex items-center justify-center animate-bounce" style={{ animationDuration: '2s' }}>
-            
-            {/* 📍 KIM CHỈ VÒNG QUAY Ở ĐỈNH VÒNG QUAY (Tương tự Standee) */}
             <div className="absolute -top-3 z-20 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[10px] border-t-yellow-300 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"></div>
 
-            {/* 🎡 LOGO VÒNG QUAY MAY MẮN (Đỏ - Trắng / Vàng - Xanh sọc xen kẽ có chấm Đèn LED viền) */}
-            <div 
-              className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-amber-400 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.9)] transition-all duration-500 group-hover:shadow-[0_0_35px_rgba(239,68,68,1)] flex items-center justify-center overflow-hidden"
-            >
-              {/* Mặt đĩa vòng quay xen kẽ 12 múi đỏ/trắng/vàng theo chuẩn Standee */}
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-amber-400 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.9)] transition-all duration-500 group-hover:shadow-[0_0_35px_rgba(239,68,68,1)] flex items-center justify-center overflow-hidden">
               <div 
-                className="absolute inset-0.5 rounded-full bg-[conic-gradient(from_0deg,#dc2626_0deg_30deg,#ffffff_30deg_60deg,#dc2626_60deg_90deg,#ffffff_90deg_120deg,#dc2626_120deg_150deg,#ffffff_150deg_180deg,#dc2626_180deg_210deg,#ffffff_210deg_240deg,#dc2626_240deg_270deg,#ffffff_270deg_300deg,#dc2626_300deg_330deg,#ffffff_330deg_360deg)] opacity-90 animate-spin"
+                className="absolute inset-0.5 rounded-full bg-[conic-gradient(from_0deg,#dc2626_0deg_30deg,#ffffff_30deg_60deg,#dc2626_60deg_90deg,#ffffff_90deg_120deg,#dc2626_120deg_150deg,#ffffff_150deg_180deg,#dc2626_180deg_210deg,#dc2626_240deg_270deg,#ffffff_270deg_300deg,#dc2626_300deg_330deg,#ffffff_330deg_360deg)] opacity-90 animate-spin"
                 style={{ animationDuration: '10s' }}
               ></div>
-
-              {/* Các nút Đèn LED vàng tròn viền quanh bánh xe */}
               <div className="absolute inset-0 rounded-full border-2 border-dashed border-yellow-200/80 animate-pulse"></div>
-              
-              {/* Vòng kim loại tâm bánh xe */}
               <div className="absolute w-8 h-8 rounded-full border-2 border-amber-300 bg-amber-600/40 backdrop-blur-[1px]"></div>
             </div>
 
-            {/* 🍜 BIỂU TƯỢNG TÔ MÌ & ĐŨA NỔI Ở PHÍA TRƯỚC VÒNG QUAY */}
             <div className="absolute z-10 flex items-center justify-center filter drop-shadow-[0_4px_12px_rgba(0,0,0,1)] transition-transform duration-300 group-hover:scale-110">
-              <span className="text-4xl sm:text-5xl">
-                🍜
-              </span>
+              <span className="text-4xl sm:text-5xl">🍜</span>
             </div>
           </div>
 
-          {/* 🏷️ CHỮ QUAY MÓN NỔI BẬT PHÍA DƯỚI */}
           <span className="relative z-10 text-[11px] sm:text-[12px] font-black tracking-widest text-amber-300 uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,1)] mt-1 group-hover:text-white transition-colors">
             QUAY MÓN
           </span>
@@ -306,7 +267,7 @@ export default function RandomDishModal({ dishes }) {
               </h3>
             </div>
 
-            {/* Container dải băng */}
+            {/* Container Dải Băng */}
             <div 
               ref={containerRef}
               className="relative my-6 bg-slate-950/80 p-2 rounded-2xl border border-slate-800 overflow-hidden h-44 shadow-inner flex items-center"
@@ -315,7 +276,7 @@ export default function RandomDishModal({ dishes }) {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20 text-amber-400 text-xs">▼</div>
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 z-20 text-amber-400 text-xs">▲</div>
 
-              {/* Dải Băng */}
+              {/* Dải Băng Thẻ Món */}
               <div
                 ref={stripRef}
                 className="flex gap-2.5 items-center absolute left-0"
@@ -330,16 +291,16 @@ export default function RandomDishModal({ dishes }) {
                     >
                       <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/20 mt-1">
                         {dish.imageUrl || dish.image ? (
-                      <Image
-                        src={dish.imageUrl || urlFor(dish.image).url()}
-                        alt={dish.title || 'Món'}
-                        fill
-                       className="object-cover"
-                    />
-                      ) : (
-                     <div className="w-full h-full bg-slate-800 flex items-center justify-center text-xl">
-                       🍲
-                    </div>
+                          <Image
+                            src={dish.imageUrl || urlFor(dish.image).url()}
+                            alt={dish.title || 'Món'}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-slate-800 flex items-center justify-center text-xl">
+                            🍲
+                          </div>
                         )}
                       </div>
                       <span className="text-[11px] font-bold text-white truncate w-full px-1">
@@ -354,6 +315,7 @@ export default function RandomDishModal({ dishes }) {
               </div>
             </div>
 
+            {/* Thông Báo Kết Quả */}
             <div className="min-h-[90px] flex flex-col items-center justify-center">
               {isSpinning && (
                 <p className="text-amber-400 text-sm font-mono animate-pulse">
@@ -376,6 +338,7 @@ export default function RandomDishModal({ dishes }) {
               )}
             </div>
 
+            {/* Nút Điều Hướng */}
             <div className="flex gap-3 mt-2">
               <button
                 onClick={startCS2Spin}
@@ -395,8 +358,8 @@ export default function RandomDishModal({ dishes }) {
                 </Link>
               )}
             </div>
-            {/*// dòng này là để paste công cụ test gacha audio*/}
-            {/* 🧪 DEV TEST AUDIO BUTTONS (Chèn vào dòng 358) */}
+
+            {/* DEV TEST AUDIO BUTTONS */}
             <div className="flex gap-2 mt-4 pt-3 border-t border-slate-800 text-xs justify-center">
               <span className="text-slate-500 font-mono self-center">Dev Test:</span>
               <button 
@@ -427,7 +390,7 @@ export default function RandomDishModal({ dishes }) {
               >
                 🔊 SSR (Vàng Kim)
               </button>
-                    </div>        
+                       </div>        
           </div>
         </div>
       )}
