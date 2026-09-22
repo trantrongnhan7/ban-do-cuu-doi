@@ -293,11 +293,14 @@ export default function RandomDishModal({ dishes }) {
 
             <div className="flex gap-3 mt-2">
               <button
-                onClick={startCS2Spin}
-                disabled={isSpinning}
-                className="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 font-bold py-3 px-4 rounded-xl text-sm transition-all disabled:opacity-50 active:scale-95 shadow-md"
-              >
-                {isSpinning ? 'Đang mở hòm...' : 'Mở lại 🧰'}
+                onClick={() => {
+    playSound('spin') // 👈 Thêm phát âm thanh quay ngay khi bấm Mở lại
+    startCS2Spin()
+  }}
+  disabled={isSpinning}
+  className="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 font-bold py-3 px-4 rounded-xl text-sm transition-all"
+>
+  {isSpinning ? 'Đang mở hòm...' : 'Mở lại 🎟️'}
               </button>
 
               {winningDish && !isSpinning && (
