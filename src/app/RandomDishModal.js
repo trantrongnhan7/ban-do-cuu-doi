@@ -21,52 +21,59 @@ function removeVietnameseTones(str) {
 function getRarityInfo(tags = []) {
   const normalizedTags = tags.map(t => removeVietnameseTones(t))
 
-  const isUR = normalizedTags.some(t =>
-    ['hiem', 'hiemco', 'khotim', 'docla', 'thuonghang'].includes(t)
-  )
   const isSSR = normalizedTags.some(t =>
-    ['haisan', 'lehoi', 'damdo', 'damtiec', 'xaxi'].includes(t)
+    ['hiem', 'hiemco', 'khotim', 'docla', 'thuonghang', 'xaxi'].includes(t)
   )
   const isSR = normalizedTags.some(t =>
-    ['dacsan', 'anchoi', 'moinhau', 'haocom'].includes(t)
+    ['haisan', 'lehoi', 'damdo', 'damtiec', 'dacsan'].includes(t)
+  )
+  const isR = normalizedTags.some(t =>
+    ['anchoi', 'moinhau', 'haocom'].includes(t)
   )
 
-  if (isUR) {
-    return {
-      tier: 'UR',
-      label: 'UR - Món Hiếm 👑',
-      border: 'border-pink-500 shadow-[0_0_25px_rgba(236,72,153,0.8)]',
-      bg: 'bg-gradient-to-b from-pink-500/30 via-purple-600/40 to-red-600/50',
-      badge: 'bg-gradient-to-r from-pink-600 to-red-600 text-white font-black animate-bounce shadow-lg',
-      glow: 'shadow-[0_0_60px_rgba(236,72,153,0.9)] ring-4 ring-pink-500',
-      weight: 1
-    }
-  }
+  // 💎 1. TIER SSR (Siêu Phẩm / Cực Hiếm - Vàng Kim)
   if (isSSR) {
     return {
       tier: 'SSR',
-      label: 'SSR - Xa Xỉ 💎',
-      border: 'border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.7)]',
-      bg: 'bg-gradient-to-b from-purple-500/30 to-indigo-600/40',
-      badge: 'bg-purple-600 text-white font-bold shadow-md',
-      glow: 'shadow-[0_0_50px_rgba(168,85,247,0.8)] ring-4 ring-purple-500',
-      weight: 2
+      label: 'SSR - Siêu Phẩm 💎',
+      border: 'border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.9)]',
+      bg: 'bg-gradient-to-b from-amber-400/30 via-amber-500/40 to-orange-600/50',
+      badge: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black animate-bounce shadow-lg',
+      glow: 'shadow-[0_0_60px_rgba(245,158,11,0.9)] ring-4 ring-amber-400',
+      weight: 1
     }
   }
+
+  // 🌟 2. TIER SR (Xa Xỉ / Hiếm - Tím)
   if (isSR) {
     return {
       tier: 'SR',
-      label: 'SR - Đặc Sản 🌟',
-      border: 'border-amber-400 shadow-amber-400/50',
-      bg: 'bg-gradient-to-b from-amber-400/20 to-orange-500/30',
-      badge: 'bg-amber-500 text-white font-bold',
+      label: 'SR - Xa Xỉ 🌟',
+      border: 'border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.7)]',
+      bg: 'bg-gradient-to-b from-purple-500/30 to-indigo-600/40',
+      badge: 'bg-purple-600 text-white font-bold shadow-md',
+      glow: 'shadow-[0_0_40px_rgba(168,85,247,0.6)] ring-2 ring-purple-500',
+      weight: 2
+    }
+  }
+
+  // 🔷 3. TIER R (Đặc Sản / Khá - Xanh Dương)
+  if (isR) {
+    return {
+      tier: 'R',
+      label: 'R - Đặc Sản 🔷',
+      border: 'border-blue-400 shadow-blue-400/50',
+      bg: 'bg-gradient-to-b from-blue-400/20 to-cyan-500/30',
+      badge: 'bg-blue-600 text-white font-bold',
       glow: '',
       weight: 4
     }
   }
+
+  // 🥣 4. TIER N (Bữa Cơm / Thường - Xanh Lá)
   return {
-    tier: 'R',
-    label: 'R - Bữa Cơm 🥣',
+    tier: 'N',
+    label: 'N - Bữa Cơm 🥣',
     border: 'border-emerald-400 shadow-emerald-400/30',
     bg: 'bg-gradient-to-b from-emerald-400/10 to-teal-500/20',
     badge: 'bg-emerald-600 text-white font-medium',
@@ -88,7 +95,8 @@ function selectWeightedRandomDish(dishes) {
 
 // Bắn Pháo Hoa Kim Tuyến
 function triggerConfetti(tier) {
-  if (tier === 'UR') {
+  if (tier === 'SSR') {
+    // 💎 Pháo hoa Vàng Kim rực rỡ 3 đợt cho SSR
     const count = 200
     const defaults = { origin: { y: 0.6 } }
 
@@ -100,17 +108,25 @@ function triggerConfetti(tier) {
       })
     }
 
-    fire(0.25, { spread: 26, startVelocity: 55, colors: ['#ec4899', '#f43f5e', '#fbbf24'] })
-    fire(0.2, { spread: 60, colors: ['#a855f7', '#ec4899'] })
+    fire(0.25, { spread: 26, startVelocity: 55, colors: ['#fbbf24', '#f59e0b', '#ffffff'] })
+    fire(0.2, { spread: 60, colors: ['#d97706', '#fbbf24'] })
     fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 })
     fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, colors: ['#ffffff', '#fbbf24'] })
-    fire(0.1, { spread: 120, startVelocity: 45 })
-  } else if (tier === 'SSR') {
+  } else if (tier === 'SR') {
+    // 🌟 Pháo hoa Tím Ánh Kim cho SR
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#a855f7', '#c084fc', '#f59e0b', '#ffffff']
+      colors: ['#a855f7', '#c084fc', '#e9d5ff', '#ffffff']
+    })
+  } else if (tier === 'R') {
+    // 🔷 Pháo hoa Xanh Dương nhẹ cho R
+    confetti({
+      particleCount: 50,
+      spread: 50,
+      origin: { y: 0.6 },
+      colors: ['#3b82f6', '#60a5fa', '#93c5fd']
     })
   }
 }
@@ -140,7 +156,6 @@ export default function RandomDishModal({ dishes }) {
   const startCS2Spin = () => {
     if (isSpinning || !dishes || dishes.length === 0) return
 
-    // Xóa timer phát tiếng lạch cạch cũ nếu có
     if (tickTimerRef.current) clearTimeout(tickTimerRef.current)
 
     setIsSpinning(true)
@@ -207,13 +222,15 @@ export default function RandomDishModal({ dishes }) {
 
         const rarity = getRarityInfo(winner.tags)
 
-        // 🔊 PHÁT ÂM THANH CHÚC MỪNG PHÂN CẤP TƯƠNG ỨNG TIER
-        if (rarity.tier === 'UR') {
-          playSound('win_ur')
-        } else if (rarity.tier === 'SSR') {
+        // 🔊 PHÁT ÂM THANH THEO THỨ TỰ TIER N -> R -> SR -> SSR
+        if (rarity.tier === 'SSR') {
           playSound('win_ssr')
-        } else {
+        } else if (rarity.tier === 'SR') {
           playSound('win_sr')
+        } else if (rarity.tier === 'R') {
+          playSound('win_r')
+        } else {
+          playSound('win_n')
         }
 
         triggerConfetti(rarity.tier)
@@ -253,7 +270,7 @@ export default function RandomDishModal({ dishes }) {
               </h3>
             </div>
 
-            {/* Container */}
+            {/* Container dải băng */}
             <div 
               ref={containerRef}
               className="relative my-6 bg-slate-950/80 p-2 rounded-2xl border border-slate-800 overflow-hidden h-44 shadow-inner flex items-center"
@@ -308,7 +325,7 @@ export default function RandomDishModal({ dishes }) {
                 <div className="animate-fade-in text-center">
                   <div className="text-xs text-slate-400 uppercase font-mono mb-1">Món ăn trúng thưởng:</div>
                   <h4 className={`text-2xl font-black mb-2 ${
-                    winningRarity?.tier === 'UR' ? 'text-pink-400 animate-pulse' : winningRarity?.tier === 'SSR' ? 'text-purple-300' : 'text-amber-300'
+                    winningRarity?.tier === 'SSR' ? 'text-amber-300 animate-pulse' : winningRarity?.tier === 'SR' ? 'text-purple-300' : winningRarity?.tier === 'R' ? 'text-blue-300' : 'text-emerald-400'
                   }`}>
                     {winningDish.title}
                   </h4>
