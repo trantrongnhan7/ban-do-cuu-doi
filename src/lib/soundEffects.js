@@ -19,13 +19,6 @@ export const playSound = (type) => {
 
   // 1. Tiếng LẠCH CẠCH CS2
   if (type === 'tick' || type === 'spin') {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      try {
-        navigator.vibrate(12) // Rung nhấp nhẹ 12ms đúng nhịp ô lướt qua
-      } catch (e) {
-        // Bỏ qua nếu trình duyệt chặn
-      }
-    }
     try {
       const ctx = getAudioContext()
       if (!ctx) return
@@ -33,18 +26,18 @@ export const playSound = (type) => {
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
 
-      osc.type = 'triangle'
-      osc.frequency.setValueAtTime(1200, ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.025)
+      osc.type = 'square'
+      osc.frequency.setValueAtTime(1500, ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.035)
 
-      gain.gain.setValueAtTime(0.18, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.025)
+      gain.gain.setValueAtTime(0.55, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.035)
 
       osc.connect(gain)
       gain.connect(ctx.destination)
 
       osc.start()
-      osc.stop(ctx.currentTime + 0.025)
+      osc.stop(ctx.currentTime + 0.035)
     } catch (e) {
       console.error(e)
     }
