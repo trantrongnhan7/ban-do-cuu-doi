@@ -119,27 +119,27 @@ export function DishList({ dishes }) {
 
   return (
     <main className="min-h-screen bg-amber-50/50 py-12 px-4 sm:px-6 lg:px-8">
-      {/* KHỐI HEADER MỚI - CHỮ NỔI BẬT & LOGO HIỆN ĐẠI */}
-      <header className="relative max-w-4xl mx-auto mb-10 overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 p-6 sm:p-8 border border-amber-300/60 shadow-md backdrop-blur-sm">
-        {/* Logo mờ ẩn nhẹ ở góc phải tạo hiệu ứng chiều sâu */}
+      {/* KHỐI HEADER GIỮ NGUYÊN MÀU CHỮ NÂU + TỐI ƯU BỐ CỤC LOGO */}
+      <header className="relative max-w-4xl mx-auto mb-10 overflow-hidden rounded-3xl bg-amber-100/60 p-6 sm:p-8 border border-amber-200/80 shadow-xs">
+        {/* Pattern chìm nhẹ ở góc phải */}
         <div
-          className="absolute -right-10 -bottom-10 w-64 h-64 opacity-20 pointer-events-none bg-no-repeat bg-contain z-0 rotate-12"
+          className="absolute -right-12 -bottom-12 w-60 h-60 opacity-10 pointer-events-none bg-no-repeat bg-contain z-0 rotate-12"
           style={{ backgroundImage: "url('/hero-banner.jpg')" }}
         />
 
         <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Tiêu đề & Subtitle */}
+          {/* Giữ nguyên màu chữ nâu mộc mạc cũ */}
           <div className="text-center sm:text-left">
-            <h1 className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-700 via-orange-600 to-amber-900 tracking-tight mb-2 drop-shadow-xs">
-              🥢 Bản Đồ Cứu Đói 🍲
+            <h1 className="font-[family-name:var(--font-playful)] text-3xl sm:text-5xl font-black text-amber-950 mb-2">
+              🥢 Bản Đồ Cứu Đói 🍜
             </h1>
-            <p className="font-sans text-xs sm:text-sm font-semibold text-amber-900 bg-amber-100/90 inline-block px-3.5 py-1.5 rounded-full border border-amber-300/80 shadow-2xs">
+            <p className="font-[family-name:var(--font-mono)] text-xs sm:text-sm text-amber-800 bg-amber-100/90 inline-block px-3 py-1 rounded-md border border-amber-200">
               &gt; Bản đồ vị giác 3 miền: Lưu giữ hương vị xưa bằng góc nhìn mới_
             </p>
           </div>
 
-          {/* Logo hiển thị như một Huy Hiệu góc phải (Tự co giãn trên mobile) */}
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full overflow-hidden border-2 border-amber-400 shadow-md bg-white p-1 hidden sm:block hover:scale-105 transition-transform">
+          {/* Logo Huy Hiệu bo tròn đặt bên phải gọn gàng, không che chữ */}
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full overflow-hidden border-2 border-amber-300 shadow-sm bg-white p-1 hidden sm:block">
             <img
               src="/hero-banner.jpg"
               alt="Ẩm Thực Việt Nam"
@@ -147,6 +147,7 @@ export function DishList({ dishes }) {
             />
           </div>
         </div>
+    
 
         {/* Nội dung giữ nguyên font cũ của bạn */}
         <div className="relative z-10 text-center">
