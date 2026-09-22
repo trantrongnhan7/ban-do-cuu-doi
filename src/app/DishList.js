@@ -120,13 +120,23 @@ export function DishList({ dishes }) {
   return (
     <main className="min-h-screen bg-amber-50/50 py-12 px-4 sm:px-6 lg:px-8">
       {/* Header / Tiêu đề */}
-      <header className="max-w-4xl mx-auto mb-10 text-center">
-        <h1 className="font-[family-name:var(--font-playful)] text-4xl sm:text-5xl font-extrabold text-amber-50 drop-shadow-[0_3px_5px_rgba(180,83,9,0.5)] mb-4 tracking-wide leading-tight py-2">
-          🥢Bản Đồ Cứu Đói🍺
-        </h1>
-        <p className="font-[family-name:var(--font-mono)] text-xs sm:text-sm text-amber-800 bg-amber-100/80 inline-block px-4 py-2 rounded-full border border-amber-200 shadow-sm">
-          &gt; Bản đồ vị giác 3 miền: Lưu giữ hương vị xưa bằng góc nhìn mới_
-        </p>
+      {/* KHỐI HEADER CÓ BACKGROUND ẨN MỜ PHÍA SAU */}
+      <header className="relative max-w-4xl mx-auto mb-10 overflow-hidden rounded-3xl p-6 sm:p-8 border border-amber-200/60 shadow-xs">
+        {/* Ảnh Background ẩn mờ chuẩn đuôi .jpg */}
+        <div
+          className="absolute inset-0 opacity-15 pointer-events-none bg-center bg-no-repeat bg-contain scale-110"
+          style={{ backgroundImage: "url('/hero-banner.jpg')" }}
+        />
+
+        {/* Nội dung giữ nguyên font cũ của bạn */}
+        <div className="relative z-10 text-center">
+          <h1 className="font-[family-name:var(--font-playful)] text-3xl sm:text-5xl font-black text-amber-950 mb-2">
+            // Bản Đồ Cứu Đói 🍜
+          </h1>
+          <p className="font-[family-name:var(--font-mono)] text-xs sm:text-sm text-amber-800 bg-amber-100/80 inline-block px-3 py-1 rounded-md border border-amber-200">
+            &gt; Bản đồ vị giác 3 miền: Lưu giữ hương vị xưa bằng góc nhìn mới_
+          </p>
+        </div>
       </header>
 
       {/* Thanh Tìm kiếm & Bộ lọc Vùng miền + Bookmark */}
