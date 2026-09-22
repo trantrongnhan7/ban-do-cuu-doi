@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { urlFor } from '@/lib/sanity'
+import confetti from 'canvas-confetti'
 
 function removeVietnameseTones(str) {
   if (!str) return ''
@@ -33,9 +34,10 @@ function getRarityInfo(tags = []) {
     return {
       tier: 'UR',
       label: 'UR - Món Hiếm 👑',
-      border: 'border-pink-500 shadow-pink-500/50',
-      bg: 'bg-gradient-to-b from-pink-500/20 to-red-600/30',
-      badge: 'bg-pink-600 text-white font-extrabold animate-pulse',
+      border: 'border-pink-500 shadow-[0_0_25px_rgba(236,72,153,0.8)]',
+      bg: 'bg-gradient-to-b from-pink-500/30 via-purple-600/40 to-red-600/50',
+      badge: 'bg-gradient-to-r from-pink-600 to-red-600 text-white font-black animate-bounce shadow-lg',
+      glow: 'shadow-[0_0_60px_rgba(236,72,153,0.9)] ring-4 ring-pink-500',
       weight: 1
     }
   }
@@ -43,9 +45,10 @@ function getRarityInfo(tags = []) {
     return {
       tier: 'SSR',
       label: 'SSR - Xa Xỉ 💎',
-      border: 'border-purple-500 shadow-purple-500/50',
-      bg: 'bg-gradient-to-b from-purple-500/20 to-indigo-600/30',
-      badge: 'bg-purple-600 text-white font-bold',
+      border: 'border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.7)]',
+      bg: 'bg-gradient-to-b from-purple-500/30 to-indigo-600/40',
+      badge: 'bg-purple-600 text-white font-bold shadow-md',
+      glow: 'shadow-[0_0_50px_rgba(168,85,247,0.8)] ring-4 ring-purple-500',
       weight: 2
     }
   }
@@ -56,6 +59,7 @@ function getRarityInfo(tags = []) {
       border: 'border-amber-400 shadow-amber-400/50',
       bg: 'bg-gradient-to-b from-amber-400/20 to-orange-500/30',
       badge: 'bg-amber-500 text-white font-bold',
+      glow: '',
       weight: 4
     }
   }
@@ -65,6 +69,7 @@ function getRarityInfo(tags = []) {
     border: 'border-emerald-400 shadow-emerald-400/30',
     bg: 'bg-gradient-to-b from-emerald-400/10 to-teal-500/20',
     badge: 'bg-emerald-600 text-white font-medium',
+    glow: '',
     weight: 8
   }
 }
@@ -78,6 +83,37 @@ function selectWeightedRandomDish(dishes) {
     }
   })
   return weightedList[Math.floor(Math.random() * weightedList.length)]
+}
+
+// Bắn Pháo Hoa Kim Tuyến
+function triggerConfetti(tier) {
+  if (tier === 'UR') {
+    // Pháo hoa siêu lớn cho UR (bắn 3 đợt liên tiếp)
+    const count = 200
+    const defaults = { origin: { y: 0.6 } }
+
+    function fire(particleRatio, opts) {
+      confetti({
+        ...defaults,
+        ...opts,
+        particleCount: Math.floor(count * particleRatio)
+      })
+    }
+
+    fire(0.25, { spread: 26, startVelocity: 55, colors: ['#ec4899', '#f43f5e', '#fbbf24'] })
+    fire(0.2, { spread: 60, colors: ['#a855f7', '#ec4899'] })
+    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 })
+    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, colors: ['#ffffff', '#fbbf24'] })
+    fire(0.1, { spread: 120, startVelocity: 45 })
+  } else if (tier === 'SSR') {
+    // Pháo hoa kim tuyến màu tím ánh vàng cho SSR
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#a855f7', '#c084fc', '#f59e0b', '#ffffff']
+    })
+  }
 }
 
 export default function RandomDishModal({ dishes }) {
@@ -101,12 +137,10 @@ export default function RandomDishModal({ dishes }) {
     setIsSpinning(true)
     setWinningDish(null)
 
-    // 1. Chọn món trúng thưởng
     const winner = selectWeightedRandomDish(dishes)
-
-    // 2. Tạo dải băng dài 55 ô (vị trí 42 là ô trúng thưởng)
     const TARGET_INDEX = 42
     const generatedStrip = []
+    
     for (let i = 0; i < 55; i++) {
       if (i === TARGET_INDEX) {
         generatedStrip.push(winner)
@@ -117,13 +151,11 @@ export default function RandomDishModal({ dishes }) {
     }
     setStripDishes(generatedStrip)
 
-    // Reset dải băng
     if (stripRef.current) {
       stripRef.current.style.transition = 'none'
       stripRef.current.style.transform = 'translateX(0px)'
     }
 
-    // 3. Tính vị trí sát rìa đầy kịch tính
     setTimeout(() => {
       if (!stripRef.current || !containerRef.current) return
 
@@ -134,28 +166,31 @@ export default function RandomDishModal({ dishes }) {
       const cardWidth = winnerCardNode.offsetWidth
       const containerWidth = containerRef.current.clientWidth
 
-      // Khoảng dịch chuyển gốc đưa thẻ vào chính giữa
       const exactCenterTargetX = -(cardLeftOffset + cardWidth / 2 - containerWidth / 2)
-
-      // Tạo điểm dừng suýt soát ngẫu nhiên:
-      // Tối đa lệch tới 40% bề rộng thẻ (sát mép vạch vàng, cách mép chuyển ô chỉ 2 - 10px)
       const maxEdgeJitter = (cardWidth / 2) * 0.8
       const isLeftOrRight = Math.random() > 0.5 ? 1 : -1
       const edgeOffset = (Math.random() * (maxEdgeJitter - 10) + 10) * isLeftOrRight
 
       const finalTargetX = exactCenterTargetX + edgeOffset
 
-      // Đường cong Bezier kéo dài 8.5 giây, cực kỳ chậm ở đoạn cuối (0.05, 0.95, 0.05, 1)
       stripRef.current.style.transition = 'transform 8.5s cubic-bezier(0.05, 0.95, 0.05, 1)'
       stripRef.current.style.transform = `translateX(${finalTargetX}px)`
 
-      // Chốt kết quả sau 8.5 giây
+      // Khoảnh khắc chốt kết quả
       setTimeout(() => {
         setIsSpinning(false)
         setWinningDish(winner)
+
+        // Kiểm tra độ hiếm để kích hoạt Nổ Pháo Hoa
+        const rarity = getRarityInfo(winner.tags)
+        if (rarity.tier === 'UR' || rarity.tier === 'SSR') {
+          triggerConfetti(rarity.tier)
+        }
       }, 8500)
     }, 100)
   }
+
+  const winningRarity = winningDish ? getRarityInfo(winningDish.tags) : null
 
   return (
     <>
@@ -164,12 +199,14 @@ export default function RandomDishModal({ dishes }) {
         className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-red-600 via-amber-500 to-orange-500 hover:scale-105 text-white font-extrabold py-3.5 px-6 rounded-full shadow-2xl border-2 border-amber-300 flex items-center gap-2 transition-all active:scale-95 animate-bounce"
       >
         <span className="text-2xl">🧰</span>
-        <span className="tracking-wide">Mở Hòm Đồ Ăn Cứu Đói </span>
+        <span className="tracking-wide">Mở Hòm Cứu Đói </span>
       </button>
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg">
-          <div className="bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-6 max-w-xl w-full shadow-[0_0_50px_rgba(245,158,11,0.2)] relative text-center overflow-hidden">
+          <div className={`bg-slate-900 border-2 rounded-3xl p-6 max-w-xl w-full relative text-center overflow-hidden transition-all duration-500 ${
+            winningRarity?.glow ? winningRarity.glow : 'border-amber-500/40 shadow-[0_0_50px_rgba(245,158,11,0.2)]'
+          }`}>
             
             <button
               onClick={() => setIsOpen(false)}
@@ -190,7 +227,6 @@ export default function RandomDishModal({ dishes }) {
               ref={containerRef}
               className="relative my-6 bg-slate-950/80 p-2 rounded-2xl border border-slate-800 overflow-hidden h-44 shadow-inner flex items-center"
             >
-              {/* Vạch vàng chính giữa */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-full bg-amber-500 z-10 shadow-[0_0_15px_#f59e0b]"></div>
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20 text-amber-400 text-xs">▼</div>
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 z-20 text-amber-400 text-xs">▲</div>
@@ -240,11 +276,13 @@ export default function RandomDishModal({ dishes }) {
               {winningDish && !isSpinning && (
                 <div className="animate-fade-in text-center">
                   <div className="text-xs text-slate-400 uppercase font-mono mb-1">Món ăn trúng thưởng:</div>
-                  <h4 className="text-2xl font-black text-amber-300 mb-2">
+                  <h4 className={`text-2xl font-black mb-2 ${
+                    winningRarity?.tier === 'UR' ? 'text-pink-400 animate-pulse' : winningRarity?.tier === 'SSR' ? 'text-purple-300' : 'text-amber-300'
+                  }`}>
                     {winningDish.title}
                   </h4>
-                  <span className={`inline-block text-xs px-3 py-1 rounded-full border mb-4 ${getRarityInfo(winningDish.tags).badge}`}>
-                    {getRarityInfo(winningDish.tags).label}
+                  <span className={`inline-block text-xs px-3 py-1 rounded-full border mb-4 ${winningRarity?.badge}`}>
+                    {winningRarity?.label}
                   </span>
                 </div>
               )}
