@@ -53,11 +53,27 @@ export function DishList({ dishes }) {
     const matchesVibe =
       !selectedVibe ||
       dish.tags?.some((t) => {
-        const normTag = t.toLowerCase()
-        if (selectedVibe === 'chaytui') return [ 'binhdan', 'tietkiem', 're'].includes(normTag)
-        if (selectedVibe === 'troilanh') return [ 'hot', 'cay', 'lau', 'monnuoc'].includes(normTag)
-        if (selectedVibe === 'anchoi') return ['anchoi', 'dacsan', 'anvat'].includes(normTag)
-        if (selectedVibe === 'nhau') return ['moinhau', 'haocom', 'donuong', 'haisan', 'nhau'].includes(normTag)
+        // Chuyển tag trong Sanity về dạng không dấu, viết liền, chữ thường
+        const normTag = t
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/đ/g, 'd')
+          .replace(/Đ/g, 'D')
+          .toLowerCase()
+          .replace(/\s+/g, '')
+
+        if (selectedVibe === 'chaytui') {
+          return ['cuoithang', 'binhdan', 'tietkiem', 'haocom', 're', 'combinhdan'].includes(normTag)
+        }
+        if (selectedVibe === 'troilanh') {
+          return ['mualanh', 'troilanh', 'monnong', 'lau', 'cay', 'noilau', 'hot','monnuoc'].includes(normTag)
+        }
+        if (selectedVibe === 'anchoi') {
+          return ['anchoi', 'anvat', 'che'].includes(normTag)
+        }
+        if (selectedVibe === 'nhau') {
+          return ['nhau', 'moinhau', 'haisan'].includes(normTag)
+        }
         return true
       })
     const matchesSearch =
