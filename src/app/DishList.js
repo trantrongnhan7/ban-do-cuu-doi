@@ -63,34 +63,56 @@ export function DishList({ dishes }) {
   }
   // Lọc danh sách món ăn theo Tìm kiếm, Vùng miền / Bookmark, Hashtag và Vibe Tình Huống
   const filteredDishes = dishes.filter((dish) => {
-    // 1. Lọc theo Tình huống (Vibe)
+    // 1. Lọc theo Tình huống (Vibe Filter)
     const matchesVibe =
       !selectedVibe ||
-      dish.hashtags?.some((t) => {
-        const normTag = t
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/đ/g, 'd')
-          .replace(/Đ/g, 'D')
-          .toLowerCase()
-          .replace(/\s+/g, '')
+      (() => {
+        // Gom toàn bộ thuộc tính phân loại về 1 mảng chuỗi để kiểm tra linh hoạt
+        const allDishMeta = [
+          dish.occasion, // Ngữ cảnh từ Sanity (cuoi-thang-chay-tui, moi-nhau-tan-gau...)
+          ...(dish.hashtags || []),
+          ...(dish.tasteProfiles || []),
+          ...(dish.tags || []),
+          dish.title || '',
+          dish.story || '',
+          dish.description || '',
+        ]
+          .filter(Boolean)
+          .map((item) =>
+            item
+              .toString()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .replace(/đ/g, 'd')
+              .replace(/Đ/g, 'D')
+              .toLowerCase()
+              .replace(/\s+/g, '')
+          )
 
         if (selectedVibe === 'chaytui') {
-          return ['cuoithang', 'tietkiem', 'haocom', 're', 'combinhdan'].includes(normTag)
+          return allDishMeta.some((meta) =>
+            ['cuoithang', 'cuoithangchaytui', 'tietkiem', 'haocom', 're', 'combinhdan', 'binhdan'].some((k) => meta.includes(k))
+          )
         }
         if (selectedVibe === 'troilanh') {
-          return ['mualanh', 'troilanh', 'monnong', 'lau', 'cay', 'noilau', 'hot', 'monnuoc'].includes(normTag)
+          return allDishMeta.some((meta) =>
+            ['mualanh', 'troilanh', 'monnong', 'lau', 'cay', 'noilau', 'hot', 'monnuoc'].some((k) => meta.includes(k))
+          )
         }
         if (selectedVibe === 'anchoi') {
-          return ['anchoi', 'anvat', 'che'].includes(normTag)
+          return allDishMeta.some((meta) =>
+            ['anchoi', 'anvat', 'che', 'anchoinhenhang'].some((k) => meta.includes(k))
+          )
         }
         if (selectedVibe === 'nhau') {
-          return ['nhau', 'moinhau', 'haisan'].includes(normTag)
+          return allDishMeta.some((meta) =>
+            ['nhau', 'moinhau', 'moinhautan-gau', 'haisan'].some((k) => meta.includes(k))
+          )
         }
         return true
-      })
+      })()
 
-    // 2. Lọc theo Tìm Kiếm (Tên món, Nguồn gốc story, Hashtag, Vị giác, Nguyên liệu)
+    // 2. Lọc theo Tìm Kiếm
     const query = searchQuery.toLowerCase().trim()
     const matchesSearch =
       !query ||
@@ -101,7 +123,7 @@ export function DishList({ dishes }) {
       dish.tasteProfiles?.some((taste) => taste.toLowerCase().includes(query)) ||
       dish.ingredients?.some((ing) => ing.toLowerCase().includes(query))
 
-    // 3. Lọc theo Vùng miền hoặc Tab "Đã Lưu"
+    // 3. Lọc theo Vùng miền / Đã lưu
     let matchesRegion = true
     if (selectedRegion === 'saved') {
       matchesRegion = bookmarkedIds.includes(dish._id)
@@ -116,7 +138,7 @@ export function DishList({ dishes }) {
         (selectedRegion === 'nam' && (dish.region === 'Miền Nam' || dish.region === 'mien-nam'))
     }
 
-    // 4. Lọc theo Hashtag đang chọn trên màn hình
+    // 4. Lọc theo Hashtag đang chọn
     const matchesTag =
       !selectedTag ||
       dish.hashtags?.some((t) => t.toLowerCase() === selectedTag.toLowerCase()) ||
