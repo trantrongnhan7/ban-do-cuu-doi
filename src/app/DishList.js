@@ -61,53 +61,30 @@ export function DishList({ dishes }) {
       })
     }
   }
-  // Lọc danh sách món ăn theo Tìm kiếm, Vùng miền / Bookmark, Hashtag và Vibe Tình Huống
+  // Lọc danh sách món ăn
   const filteredDishes = dishes.filter((dish) => {
-    // 1. Lọc theo Tình huống (Vibe Filter)
+    // 1. Lọc theo Tình huống (CHỈ đọc trực tiếp dữ liệu tích chọn từ ô Ngữ Cảnh Ăn Uống trong Studio)
     const matchesVibe =
       !selectedVibe ||
       (() => {
-        // Gom toàn bộ thuộc tính phân loại về 1 mảng chuỗi để kiểm tra linh hoạt
-        const allDishMeta = [
-          dish.occasion, // Ngữ cảnh từ Sanity (cuoi-thang-chay-tui, moi-nhau-tan-gau...)
-          ...(dish.hashtags || []),
-          ...(dish.tasteProfiles || []),
-          ...(dish.tags || []),
-          dish.title || '',
-          dish.story || '',
-          dish.description || '',
-        ]
-          .filter(Boolean)
-          .map((item) =>
-            item
-              .toString()
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '')
-              .replace(/đ/g, 'd')
-              .replace(/Đ/g, 'D')
-              .toLowerCase()
-              .replace(/\s+/g, '')
-          )
+        // Lấy danh sách các mục occasion đã tích trong Sanity (mảng các chuỗi slug)
+        const occasions = Array.isArray(dish.occasion)
+          ? dish.occasion
+          : dish.occasion
+          ? [dish.occasion]
+          : []
 
         if (selectedVibe === 'chaytui') {
-          return allDishMeta.some((meta) =>
-            ['cuoi-thang-chay-tui', 'cuoithang', 'tietkiem', 'haocom'].some((k) => meta.includes(k))
-          )
+          return occasions.includes('cuoi-thang-chay-tui') || occasions.includes('cuoithang')
         }
         if (selectedVibe === 'troilanh') {
-          return allDishMeta.some((meta) =>
-            ['tru-lanh-ngay-mua', 'troilanh', 'mualanh', 'monnong', 'lau', 'cay'].some((k) => meta.includes(k))
-          )
+          return occasions.includes('tru-lanh-ngay-mua') || occasions.includes('troilanh')
         }
         if (selectedVibe === 'anchoi') {
-          return allDishMeta.some((meta) =>
-            ['an-choi-tan-gau', 'anchoi', 'anvat', 'che'].some((k) => meta.includes(k))
-          )
+          return occasions.includes('an-choi-tan-gau') || occasions.includes('anchoi')
         }
         if (selectedVibe === 'nhau') {
-          return allDishMeta.some((meta) =>
-            ['nhau-toi-ben', 'nhau', 'moinhau', 'haisan'].some((k) => meta.includes(k))
-          )
+          return occasions.includes('nhau-toi-ben') || occasions.includes('nhau')
         }
         return true
       })()
