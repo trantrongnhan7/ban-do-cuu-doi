@@ -49,28 +49,68 @@ export const playSound = (type) => {
     const ctx = getAudioContext()
     if (!ctx) return
 
-    // 💎 1. TIER SSR (Vàng Kim): Fanfare Hoành Tráng 6 nốt dồn dập
-    if (type === 'win_ssr') {
-      const melody = [
-        { freq: 523.25, time: 0, duration: 0.12 },
-        { freq: 659.25, time: 0.1, duration: 0.12 },
-        { freq: 783.99, time: 0.2, duration: 0.12 },
-        { freq: 1046.50, time: 0.32, duration: 0.15 },
-        { freq: 880.00, time: 0.45, duration: 0.12 },
-        { freq: 1174.66, time: 0.58, duration: 0.8 },
+    // 💎 TIER SSR (SIÊU PHẨM VÀNG KIM): Âm thanh Bùng Nổ, Hoành Tráng & Vang Dội!
+    else if (type === 'win_ssr') {
+      const now = ctx.currentTime
+
+      // 💥 1. BASS BOOM (Nổ hũ rung chuyển ngay nốt đầu)
+      const subOsc = ctx.createOscillator()
+      const subGain = ctx.createGain()
+      subOsc.type = 'sine'
+      subOsc.frequency.setValueAtTime(100, now)
+      subOsc.frequency.exponentialRampToValueAtTime(25, now + 0.6)
+      subGain.gain.setValueAtTime(0.5, now)
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6)
+      subOsc.connect(subGain)
+      subGain.connect(ctx.destination)
+      subOsc.start(now)
+      subOsc.stop(now + 0.6)
+
+      // 🎺 2. KÈN TRUMPET FANFARE SIÊU PHẨM (7 Nốt Dồn Dập & Bay Bổng)
+      const fanfare = [
+        { freq: 523.25, time: 0, duration: 0.1 },    // C5
+        { freq: 659.25, time: 0.09, duration: 0.1 }, // E5
+        { freq: 783.99, time: 0.18, duration: 0.1 }, // G5
+        { freq: 1046.50, time: 0.28, duration: 0.15 },// C6
+        { freq: 880.00, time: 0.42, duration: 0.12 }, // A5
+        { freq: 1174.66, time: 0.54, duration: 0.15 },// D6
+        { freq: 1318.51, time: 0.68, duration: 1.2 }, // E6 (Kéo dài ngân vang hoành tráng)
       ]
 
-      melody.forEach((note) => {
+      fanfare.forEach((note) => {
         const osc = ctx.createOscillator()
         const gain = ctx.createGain()
-        osc.type = 'sawtooth'
-        osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time)
-        gain.gain.setValueAtTime(0.2, ctx.currentTime + note.time)
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + note.time + note.duration)
+
+        osc.type = 'sawtooth' // Giả lập kèn đồng chiến thắng
+        osc.frequency.setValueAtTime(note.freq, now + note.time)
+
+        gain.gain.setValueAtTime(0.28, now + note.time)
+        gain.gain.exponentialRampToValueAtTime(0.001, now + note.time + note.duration)
+
         osc.connect(gain)
         gain.connect(ctx.destination)
-        osc.start(ctx.currentTime + note.time)
-        osc.stop(ctx.currentTime + note.time + note.duration)
+
+        osc.start(now + note.time)
+        osc.stop(now + note.time + note.duration)
+      })
+
+      // ✨ 3. TẦNG CHUÔNG KIM TUYẾN ÁNH VÀNG (Arpeggio lấp lánh đệm phía sau)
+      const shimmer = [659.25, 783.99, 1046.50, 1318.51, 1567.98]
+      shimmer.forEach((freq, index) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(freq, now + 0.7 + index * 0.08)
+
+        gain.gain.setValueAtTime(0.2, now + 0.7 + index * 0.08)
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7 + index * 0.08 + 0.5)
+
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+
+        osc.start(now + 0.7 + index * 0.08)
+        osc.stop(now + 0.7 + index * 0.08 + 0.5)
       })
     } 
 
