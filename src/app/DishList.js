@@ -101,7 +101,7 @@ export function DishList({ dishes }) {
         }
         if (selectedVibe === 'anchoi') {
           return allDishMeta.some((meta) =>
-            ['anchoi', 'anvat', 'che', 'anchoinhenhang'].some((k) => meta.includes(k))
+            ['anchoi', 'anvat', 'che', 'anvatanchoi'].some((k) => meta.includes(k))
           )
         }
         if (selectedVibe === 'nhau') {

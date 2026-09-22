@@ -134,10 +134,10 @@ export default {
       of: [{ type: 'string' }],
       options: {
         list: [
-          { title: 'Bữa Cơm Gia Đình', value: 'bua-com-gia-dinh' },
+          { title: 'Bữa Cơm Hằng Ngày', value: 'bua-com-hang-ngay' },
           { title: 'Đặc Sản Du Lịch', value: 'dac-san-du-lich' },
           { title: 'Mồi Nhậu Tán Gẫu', value: 'moi-nhau-tan-gau' },
-          { title: 'Ăn Chơi Nhẹ Nhàng', value: 'an-choi-nhe-nhang' },
+          { title: 'Ăn Vặt Ăn Chơi', value: 'an-vat-an-choi' },
           { title: 'Cuối Tháng Cháy Túi', value: 'cuoi-thang-chay-tui' },
         ],
       },
