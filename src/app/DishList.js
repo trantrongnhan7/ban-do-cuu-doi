@@ -258,8 +258,16 @@ export function DishList({ dishes }) {
                       />
                     )}
                     <span className="absolute top-3 right-3 bg-amber-950/70 backdrop-blur-md text-amber-100 text-xs px-2.5 py-1 rounded-full border border-amber-700/30 font-medium z-10">
-                      {dish.region === 'mien-bac' ? 'Miền Bắc' : dish.region === 'mien-trung' ? 'Miền Trung' : dish.region === 'mien-nam' ? 'Miền Nam' : dish.region || 'Cả 3 Miền'}
-                    </span>
+                       {dish.region === 'ca-3-mien' || dish.region === 'Cả 3 Miền'
+                         ? 'Cả 3 Miền'
+                       : dish.region === 'mien-bac' || dish.region === 'Miền Bắc'
+                      ? 'Miền Bắc'
+                       : dish.region === 'mien-trung' || dish.region === 'Miền Trung'
+                       ? 'Miền Trung'
+                       : dish.region === 'mien-nam' || dish.region === 'Miền Nam'
+                      ? 'Miền Nam'
+                       : dish.region || 'Cả 3 Miền'}
+                     </span>
 
                     {/* Nút Bookmark Thả Tim ❤️ */}
                     <button

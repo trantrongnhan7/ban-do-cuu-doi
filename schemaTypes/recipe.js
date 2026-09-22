@@ -99,7 +99,15 @@ export default {
       type: 'array',
       of: [{ type: 'string' }],
       options: {
-        list: ['Đậm đà', 'Cay', 'Ngọt', 'Chua', 'Béo ngậy', 'Thanh mát', 'Chát / Đắng'],
+        list: [
+          { title: 'Đậm đà', value: 'dam-da' },
+          { title: 'Cay', value: 'cay' },
+          { title: 'Ngọt', value: 'ngot' },
+          { title: 'Chua', value: 'chua' },
+          { title: 'Béo ngậy', value: 'beo-ngay' },
+          { title: 'Thanh mát', value: 'thanh-mat' },
+          { title: 'Chát / Đắng', value: 'chat-dang' },
+        ],
       },
     },
 
@@ -110,7 +118,13 @@ export default {
       type: 'array',
       of: [{ type: 'string' }],
       options: {
-        list: ['Sáng', 'Trưa', 'Tối', 'Ăn Khuya', 'Mọi lúc'],
+        list: [
+          { title: 'Sáng', value: 'sang' },
+          { title: 'Trưa', value: 'trua' },
+          { title: 'Tối', value: 'toi' },
+          { title: 'Ăn Khuya', value: 'an-khuya' },
+          { title: 'Mọi lúc', value: 'moi-luc' },
+        ],
       },
     },
     {
@@ -119,7 +133,13 @@ export default {
       type: 'array',
       of: [{ type: 'string' }],
       options: {
-        list: ['Bữa cơm gia đình', 'Đặc sản du lịch', 'Mồi nhậu tán gẫu', 'Ăn chơi nhẹ nhàng', 'Cuối tháng cháy túi'],
+        list: [
+          { title: 'Bữa Cơm Gia Đình', value: 'bua-com-gia-dinh' },
+          { title: 'Đặc Sản Du Lịch', value: 'dac-san-du-lich' },
+          { title: 'Mồi Nhậu Tán Gẫu', value: 'moi-nhau-tan-gau' },
+          { title: 'Ăn Chơi Nhẹ Nhàng', value: 'an-choi-nhe-nhang' },
+          { title: 'Cuối Tháng Cháy Túi', value: 'cuoi-thang-chay-tui' },
+        ],
       },
     },
 
