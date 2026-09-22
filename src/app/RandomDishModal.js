@@ -242,42 +242,47 @@ export default function RandomDishModal({ dishes }) {
 
   return (
     <>
-      {/* 🎡 WIDGET BÁT MÌ + VÒNG QUAY NỔI BẬT (GACHA FLOATING ICON) */}
+      {/* 🎡 WIDGET BÁT MÌ + VÒNG QUAY CẦU CỒNG / ĐÈN LED NỔI BẬT */}
       <div className="fixed bottom-5 right-5 z-40 flex flex-col items-center">
         
-        {/* Tag "Hôm Nay Ăn Gì?" nhấp nháy nổi bật phía trên */}
-        <span className="mb-1.5 text-[10px] font-black uppercase tracking-wider text-amber-200 bg-gradient-to-r from-red-600 to-orange-600 px-2.5 py-0.5 rounded-full border border-amber-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-bounce">
+        {/* Thẻ "Hôm Nay Ăn Gì?" đẩy tọa độ cao nhích lên hẳn để nhấp nháy không bị che */}
+        <span className="mb-3 text-[10px] font-black uppercase tracking-wider text-amber-200 bg-gradient-to-r from-red-600 to-orange-600 px-3 py-1 rounded-full border border-amber-300 shadow-[0_0_15px_rgba(239,68,68,0.9)] animate-bounce z-20">
           🎲 Hôm Nay Ăn Gì?
         </span>
 
-        {/* Nút bấm chứa Vòng Quay + Tô Mì */}
+        {/* Nút bấm chứa Vòng Quay Standee + Tô Mì */}
         <button
           onClick={handleOpenAndSpin}
           aria-label="Quay Món Ăn Gacha"
           className="group relative p-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-125 active:scale-95"
         >
-          {/* Lớp Hào Quang Neon nhấp nháy phía sau cùng */}
-          <div className="absolute inset-0 rounded-full bg-amber-500/60 blur-xl group-hover:bg-red-500/90 transition-all duration-500 animate-pulse"></div>
-
-          {/* CONTAINER ĐỒNG BỘ NẢY (Cả Vòng Quay và Tô Mì nảy cùng nhịp) */}
+          
+          <div className="absolute inset-0 rounded-full bg-amber-500/50 blur-xl group-hover:bg-red-500/80 transition-all duration-500 animate-pulse"></div>
           <div className="relative flex items-center justify-center animate-bounce" style={{ animationDuration: '2s' }}>
-            
-            {/* 🎡 LOGO VÒNG QUAY GA CHA NẰM ĐẰNG SAU TÔ MÌ */}
+            <div className="absolute -top-3 z-20 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[10px] border-t-yellow-300 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"></div>
+
+            {/* 🎡 LOGO VÒNG QUAY MAY MẮN (Đỏ - Trắng / Vàng - Xanh sọc xen kẽ có chấm Đèn LED viền) */}
             <div 
-              className="absolute w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-amber-300/90 bg-[conic-gradient(from_0deg,#f59e0b_0deg_45deg,#ef4444_45deg_90deg,#10b981_90deg_135deg,#3b82f6_135deg_180deg,#8b5cf6_180deg_225deg,#ec4899_225deg_270deg,#f97316_270deg_315deg,#eab308_315deg_360deg)] opacity-80 shadow-[0_0_20px_rgba(245,158,11,0.8)] transition-all duration-500 group-hover:opacity-100 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(239,68,68,1)] animate-spin"
-              style={{ animationDuration: '8s' }}
+              className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-amber-400 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.9)] transition-all duration-500 group-hover:shadow-[0_0_35px_rgba(239,68,68,1)] flex items-center justify-center overflow-hidden"
             >
-              {/* Tâm vòng quay đốm kim tuyến */}
-              <div className="absolute inset-1.5 rounded-full border border-amber-200/50"></div>
+              {/* Mặt đĩa vòng quay xen kẽ 12 múi đỏ/trắng/vàng theo chuẩn Standee */}
+              <div 
+                className="absolute inset-0.5 rounded-full bg-[conic-gradient(from_0deg,#dc2626_0deg_30deg,#ffffff_30deg_60deg,#dc2626_60deg_90deg,#ffffff_90deg_120deg,#dc2626_120deg_150deg,#ffffff_150deg_180deg,#dc2626_180deg_210deg,#ffffff_210deg_240deg,#dc2626_240deg_270deg,#ffffff_270deg_300deg,#dc2626_300deg_330deg,#ffffff_330deg_360deg)] opacity-90 animate-spin"
+                style={{ animationDuration: '10s' }}
+              ></div>
+
+              {/* Các nút Đèn LED vàng tròn viền quanh bánh xe */}
+              <div className="absolute inset-0 rounded-full border-2 border-dashed border-yellow-200/80 animate-pulse"></div>
+              
+              {/* Vòng kim loại tâm bánh xe */}
+              <div className="absolute w-8 h-8 rounded-full border-2 border-amber-300 bg-amber-600/40 backdrop-blur-[1px]"></div>
             </div>
 
             {/* 🍜 BIỂU TƯỢNG TÔ MÌ & ĐŨA NỔI Ở PHÍA TRƯỚC VÒNG QUAY */}
-            <div className="relative z-10 flex items-center justify-center filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)] transition-transform duration-300 group-hover:scale-110">
+            <div className="absolute z-10 flex items-center justify-center filter drop-shadow-[0_4px_12px_rgba(0,0,0,1)] transition-transform duration-300 group-hover:scale-110">
               <span className="text-4xl sm:text-5xl">
                 🍜
               </span>
-            </div>
-
           </div>
 
           {/* 🏷️ CHỮ QUAY MÓN NỔI BẬT PHÍA DƯỚI */}
