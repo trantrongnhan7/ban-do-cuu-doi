@@ -63,7 +63,7 @@ export function DishList({ dishes }) {
           .replace(/\s+/g, '')
 
         if (selectedVibe === 'chaytui') {
-          return ['cuoithang', 'binhdan', 'tietkiem', 'haocom', 're', 'combinhdan'].includes(normTag)
+          return ['cuoithang', 'tietkiem', 'haocom', 're', 'combinhdan'].includes(normTag)
         }
         if (selectedVibe === 'troilanh') {
           return ['mualanh', 'troilanh', 'monnong', 'lau', 'cay', 'noilau', 'hot','monnuoc'].includes(normTag)
