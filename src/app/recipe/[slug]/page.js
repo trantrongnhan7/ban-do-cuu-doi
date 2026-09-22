@@ -144,32 +144,49 @@ export default async function RecipeDetail({ params }) {
           </div>
         </article>
 
-        {/* Khối hiển thị Món ăn cùng vùng miền */}
+        {/* Khối hiển thị Món ăn cùng vùng miền (Layout dọc cân đối & Đẹp mắt) */}
         {relatedDishes && relatedDishes.length > 0 && (
-          <section className="mt-8 pt-8 border-t border-amber-200/60">
-            <h3 className="text-lg font-bold text-amber-950 mb-4 flex items-center gap-2">
-              🍲 Món ngon khác ở {dish.region}
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <section className="mt-12 pt-8 border-t border-amber-200/80">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg sm:text-xl font-bold text-amber-950 flex items-center gap-2">
+                <span>🍲</span> Món Ngon Khác Ở {dish.region}
+              </h3>
+              <span className="text-[11px] font-semibold text-amber-800 bg-amber-100/80 px-3 py-1 rounded-full border border-amber-200/60">
+                Gợi ý cùng vị
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {relatedDishes.map((item) => (
                 <Link
                   key={item._id}
                   href={`/recipe/${item.slug}`}
-                  className="group bg-white p-3 rounded-2xl border border-amber-100 shadow-sm hover:shadow-md transition-all flex sm:flex-col items-center gap-3"
+                  className="group bg-white rounded-2xl border border-amber-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
                 >
-                  {item.image && (
-                    <div className="relative w-16 h-16 sm:w-full sm:h-28 rounded-xl overflow-hidden flex-shrink-0">
+                  {/* Khung ảnh vuông vắn tỉ lệ 16:9 */}
+                  <div className="relative h-36 w-full overflow-hidden bg-amber-100">
+                    {item.image && (
                       <Image
                         src={urlFor(item.image).url()}
                         alt={item.title}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                    </div>
-                  )}
-                  <span className="font-semibold text-amber-900 text-sm group-hover:text-amber-700 line-clamp-1">
-                    {item.title}
-                  </span>
+                    )}
+                    <span className="absolute top-2.5 right-2.5 bg-amber-950/75 text-amber-50 text-[10px] font-medium px-2 py-0.5 rounded-full backdrop-blur-xs">
+                      {item.region}
+                    </span>
+                  </div>
+
+                  {/* Phần chữ tiêu đề xếp dọc gọn gàng */}
+                  <div className="p-4 flex-1 flex flex-col justify-between bg-white">
+                    <h4 className="font-bold text-amber-950 text-base group-hover:text-amber-700 transition-colors line-clamp-1 mb-1">
+                      {item.title}
+                    </h4>
+                    <span className="text-xs font-semibold text-amber-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                      Xem công thức →
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>
