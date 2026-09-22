@@ -242,32 +242,46 @@ export default function RandomDishModal({ dishes }) {
 
   return (
     <>
-      {/* 🍜 WIDGET VÒNG QUAY ẨM THỰC (FOOD GACHA) */}
+      {/* 🎡 WIDGET BÁT MÌ + VÒNG QUAY NỔI BẬT (GACHA FLOATING ICON) */}
       <div className="fixed bottom-5 right-5 z-40 flex flex-col items-center">
         
-        {/* Tag "Hôm Nay Ăn Gì?" nhấp nháy phía trên */}
-        <span className="mb-1 text-[10px] font-black uppercase tracking-wider text-amber-200 bg-gradient-to-r from-red-600 to-orange-600 px-2.5 py-0.5 rounded-full border border-amber-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-bounce">
+        {/* Tag "Hôm Nay Ăn Gì?" nhấp nháy nổi bật phía trên */}
+        <span className="mb-1.5 text-[10px] font-black uppercase tracking-wider text-amber-200 bg-gradient-to-r from-red-600 to-orange-600 px-2.5 py-0.5 rounded-full border border-amber-300 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-bounce">
           🎲 Hôm Nay Ăn Gì?
         </span>
 
-        {/* Nút bấm hình Bát Mì & Đũa ôm sát hiệu ứng Neon */}
+        {/* Nút bấm chứa Vòng Quay + Tô Mì */}
         <button
           onClick={handleOpenAndSpin}
           aria-label="Quay Món Ăn Gacha"
           className="group relative p-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-125 active:scale-95"
         >
-          {/* Lớp Hào Quang Neon nhấp nháy phát sáng phía sau tô mì */}
-          <div className="absolute inset-2 rounded-full bg-amber-500/80 blur-xl group-hover:bg-red-500/90 transition-all duration-500 animate-pulse"></div>
+          {/* Lớp Hào Quang Neon nhấp nháy phía sau cùng */}
+          <div className="absolute inset-0 rounded-full bg-amber-500/60 blur-xl group-hover:bg-red-500/90 transition-all duration-500 animate-pulse"></div>
 
-          {/* Biểu tượng Tô Mì & Đũa nổi 3D kèm viền Neon ôm sát */}
-          <div className="relative flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(251,191,36,1)] group-hover:drop-shadow-[0_0_25px_rgba(239,68,68,1)] transition-all">
-            <span className="text-4xl sm:text-5xl animate-bounce" style={{ animationDuration: '2s' }}>
-              🍜
-            </span>
+          {/* CONTAINER ĐỒNG BỘ NẢY (Cả Vòng Quay và Tô Mì nảy cùng nhịp) */}
+          <div className="relative flex items-center justify-center animate-bounce" style={{ animationDuration: '2s' }}>
+            
+            {/* 🎡 LOGO VÒNG QUAY GA CHA NẰM ĐẰNG SAU TÔ MÌ */}
+            <div 
+              className="absolute w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-amber-300/90 bg-[conic-gradient(from_0deg,#f59e0b_0deg_45deg,#ef4444_45deg_90deg,#10b981_90deg_135deg,#3b82f6_135deg_180deg,#8b5cf6_180deg_225deg,#ec4899_225deg_270deg,#f97316_270deg_315deg,#eab308_315deg_360deg)] opacity-80 shadow-[0_0_20px_rgba(245,158,11,0.8)] transition-all duration-500 group-hover:opacity-100 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(239,68,68,1)] animate-spin"
+              style={{ animationDuration: '8s' }}
+            >
+              {/* Tâm vòng quay đốm kim tuyến */}
+              <div className="absolute inset-1.5 rounded-full border border-amber-200/50"></div>
+            </div>
+
+            {/* 🍜 BIỂU TƯỢNG TÔ MÌ & ĐŨA NỔI Ở PHÍA TRƯỚC VÒNG QUAY */}
+            <div className="relative z-10 flex items-center justify-center filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)] transition-transform duration-300 group-hover:scale-110">
+              <span className="text-4xl sm:text-5xl">
+                🍜
+              </span>
+            </div>
+
           </div>
 
-          {/* Chữ QUAY MÓN phát sáng đổ bóng nổi bật */}
-          <span className="relative text-[11px] sm:text-[12px] font-black tracking-widest text-amber-300 uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,1)] shadow-amber-400 -mt-1 group-hover:text-white transition-colors">
+          {/* 🏷️ CHỮ QUAY MÓN NỔI BẬT PHÍA DƯỚI */}
+          <span className="relative z-10 text-[11px] sm:text-[12px] font-black tracking-widest text-amber-300 uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,1)] mt-1 group-hover:text-white transition-colors">
             QUAY MÓN
           </span>
         </button>
