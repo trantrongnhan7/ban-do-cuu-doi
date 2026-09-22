@@ -88,9 +88,7 @@ function selectWeightedRandomDish(dishes) {
 
 // Bắn Pháo Hoa Kim Tuyến
 function triggerConfetti(tier) {
-  playSound('win')
   if (tier === 'UR') {
-    // Pháo hoa siêu lớn cho UR (bắn 3 đợt liên tiếp)
     const count = 200
     const defaults = { origin: { y: 0.6 } }
 
@@ -108,7 +106,6 @@ function triggerConfetti(tier) {
     fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, colors: ['#ffffff', '#fbbf24'] })
     fire(0.1, { spread: 120, startVelocity: 45 })
   } else if (tier === 'SSR') {
-    // Pháo hoa kim tuyến màu tím ánh vàng cho SSR
     confetti({
       particleCount: 100,
       spread: 70,
@@ -128,7 +125,6 @@ export default function RandomDishModal({ dishes }) {
   const stripRef = useRef(null)
 
   const handleOpenAndSpin = () => {
-    playSound('spin')
     if (!dishes || dishes.length === 0) return
     setIsOpen(true)
     startCS2Spin()
@@ -176,6 +172,21 @@ export default function RandomDishModal({ dishes }) {
 
       const finalTargetX = exactCenterTargetX + edgeOffset
 
+      // 🔊 TẠO CHUỖI TIẾNG LẠCH CẠCH CHẬM DẦN CHUẨN CS2
+      let delay = 50
+      let totalTime = 0
+      const duration = 8500
+
+      const playCs2Ticks = () => {
+        if (totalTime < duration) {
+          playSound('tick')
+          delay *= 1.065 // Càng về sau tiếng tạch càng thưa dần
+          totalTime += delay
+          setTimeout(playCs2Ticks, delay)
+        }
+      }
+      playCs2Ticks()
+
       stripRef.current.style.transition = 'transform 8.5s cubic-bezier(0.05, 0.95, 0.05, 1)'
       stripRef.current.style.transform = `translateX(${finalTargetX}px)`
 
@@ -187,7 +198,7 @@ export default function RandomDishModal({ dishes }) {
         // Lấy thông tin độ hiếm của món ăn trúng
         const rarity = getRarityInfo(winner.tags)
 
-        // 🔊 PHÁT ÂM THANH PHÂN CẤP THEO ĐỘ HIẾM (R, SR, SSR, UR)
+        // 🔊 PHÁT ÂM THANH CHÚC MỪNG TƯƠNG ỨNG TIER
         if (rarity.tier === 'UR') {
           playSound('win_ur')
         } else if (rarity.tier === 'SSR') {
@@ -196,7 +207,7 @@ export default function RandomDishModal({ dishes }) {
           playSound('win_sr')
         }
 
-        // Kích hoạt pháo hoa tương ứng
+        // Kích hoạt pháo hoa
         triggerConfetti(rarity.tier)
       }, 8500)
     }, 100)
@@ -302,14 +313,11 @@ export default function RandomDishModal({ dishes }) {
 
             <div className="flex gap-3 mt-2">
               <button
-                onClick={() => {
-    playSound('spin') // 👈 Thêm phát âm thanh quay ngay khi bấm Mở lại
-    startCS2Spin()
-  }}
-  disabled={isSpinning}
-  className="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 font-bold py-3 px-4 rounded-xl text-sm transition-all"
->
-  {isSpinning ? 'Đang mở hòm...' : 'Mở lại 🎟️'}
+                onClick={startCS2Spin}
+                disabled={isSpinning}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 font-bold py-3 px-4 rounded-xl text-sm transition-all"
+              >
+                {isSpinning ? 'Đang mở hòm...' : 'Mở lại 🎟️'}
               </button>
 
               {winningDish && !isSpinning && (
