@@ -10,7 +10,7 @@ export function DishList({ dishes }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('all')
   const [selectedTag, setSelectedTag] = useState(null)
-  
+  const [selectedVibe, setSelectedVibe] = useState(null)
   // State lưu danh sách ID các món ăn đã bookmark (thả tim)
   const [bookmarkedIds, setBookmarkedIds] = useState([])
 
@@ -49,6 +49,17 @@ export function DishList({ dishes }) {
   // Lọc danh sách món ăn theo Tìm kiếm, Vùng miền / Bookmark, và Hashtag
   const filteredDishes = dishes.filter((dish) => {
     // Tìm kiếm theo tên hoặc mô tả
+    // 👈 Thêm đoạn lọc theo Tình huống
+    const matchesVibe =
+      !selectedVibe ||
+      dish.tags?.some((t) => {
+        const normTag = t.toLowerCase()
+        if (selectedVibe === 'chaytui') return [ 'binhdan', 'tietkiem', 're'].includes(normTag)
+        if (selectedVibe === 'troilanh') return [ 'hot', 'cay', 'lau', 'monnuoc'].includes(normTag)
+        if (selectedVibe === 'anchoi') return ['anchoi', 'dacsan', 'anvat'].includes(normTag)
+        if (selectedVibe === 'nhau') return ['moinhau', 'haocom', 'donuong', 'haisan', 'nhau'].includes(normTag)
+        return true
+      })
     const matchesSearch =
       dish.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dish.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -72,7 +83,7 @@ export function DishList({ dishes }) {
       !selectedTag ||
       dish.tags?.some((t) => t.toLowerCase() === selectedTag.toLowerCase())
 
-    return matchesSearch && matchesRegion && matchesTag
+    return matchesSearch && matchesRegion && matchesTag && matchesVibe
   })
 
   return (
@@ -120,6 +131,28 @@ export function DishList({ dishes }) {
               }`}
             >
               {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* 👈 BỘ LỌC TÌNH HUỐNG CỨU ĐÓI (VIBE FILTER) */}
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+          {[
+            { id: 'chaytui', label: '💸 Cuối Tháng Cháy Túi' },
+            { id: 'troilanh', label: '🌧️ Trú Lạnh / Ngày Mưa' },
+            { id: 'anchoi', label: '☕ Ăn Chơi Tán Gẫu' },
+            { id: 'nhau', label: '🍺 Nhậu Tới Bến' },
+          ].map((vibe) => (
+            <button
+              key={vibe.id}
+              onClick={() => setSelectedVibe(selectedVibe === vibe.id ? null : vibe.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+                selectedVibe === vibe.id
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-400 shadow-sm scale-105'
+                  : 'bg-white/80 text-amber-900 border-amber-200/80 hover:bg-amber-100/60'
+              }`}
+            >
+              {vibe.label}
             </button>
           ))}
         </div>
