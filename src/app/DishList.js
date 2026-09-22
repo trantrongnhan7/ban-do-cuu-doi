@@ -61,14 +61,12 @@ export function DishList({ dishes }) {
       })
     }
   }
-  // Lọc danh sách món ăn theo Tìm kiếm, Vùng miền / Bookmark, và Hashtag
+  // Lọc danh sách món ăn theo Tìm kiếm, Vùng miền / Bookmark, Hashtag và Vibe Tình Huống
   const filteredDishes = dishes.filter((dish) => {
-    // Tìm kiếm theo tên hoặc mô tả
-    // 👈 Thêm đoạn lọc theo Tình huống
+    // 1. Lọc theo Tình huống (Vibe)
     const matchesVibe =
       !selectedVibe ||
-      dish.tags?.some((t) => {
-        // Chuyển tag trong Sanity về dạng không dấu, viết liền, chữ thường
+      dish.hashtags?.some((t) => {
         const normTag = t
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
@@ -81,7 +79,7 @@ export function DishList({ dishes }) {
           return ['cuoithang', 'tietkiem', 'haocom', 're', 'combinhdan'].includes(normTag)
         }
         if (selectedVibe === 'troilanh') {
-          return ['mualanh', 'troilanh', 'monnong', 'lau', 'cay', 'noilau', 'hot','monnuoc'].includes(normTag)
+          return ['mualanh', 'troilanh', 'monnong', 'lau', 'cay', 'noilau', 'hot', 'monnuoc'].includes(normTag)
         }
         if (selectedVibe === 'anchoi') {
           return ['anchoi', 'anvat', 'che'].includes(normTag)
@@ -91,27 +89,37 @@ export function DishList({ dishes }) {
         }
         return true
       })
-    const matchesSearch =
-      dish.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dish.description?.toLowerCase().includes(searchQuery.toLowerCase())
 
-    // Lọc theo Vùng miền hoặc Tab "Đã Lưu"
+    // 2. Lọc theo Tìm Kiếm (Tên món, Nguồn gốc story, Hashtag, Vị giác, Nguyên liệu)
+    const query = searchQuery.toLowerCase().trim()
+    const matchesSearch =
+      !query ||
+      dish.title?.toLowerCase().includes(query) ||
+      dish.story?.toLowerCase().includes(query) ||
+      dish.description?.toLowerCase().includes(query) ||
+      dish.hashtags?.some((tag) => tag.toLowerCase().includes(query)) ||
+      dish.tasteProfiles?.some((taste) => taste.toLowerCase().includes(query)) ||
+      dish.ingredients?.some((ing) => ing.toLowerCase().includes(query))
+
+    // 3. Lọc theo Vùng miền hoặc Tab "Đã Lưu"
     let matchesRegion = true
     if (selectedRegion === 'saved') {
       matchesRegion = bookmarkedIds.includes(dish._id)
     } else {
       matchesRegion =
         selectedRegion === 'all' ||
+        dish.region === 'ca-3-mien' ||
         dish.region === 'Cả 3 Miền' ||
         dish.region === selectedRegion ||
-        (selectedRegion === 'bac' && dish.region === 'Miền Bắc') ||
-        (selectedRegion === 'trung' && dish.region === 'Miền Trung') ||
-        (selectedRegion === 'nam' && dish.region === 'Miền Nam')
+        (selectedRegion === 'bac' && (dish.region === 'Miền Bắc' || dish.region === 'mien-bac')) ||
+        (selectedRegion === 'trung' && (dish.region === 'Miền Trung' || dish.region === 'mien-trung')) ||
+        (selectedRegion === 'nam' && (dish.region === 'Miền Nam' || dish.region === 'mien-nam'))
     }
 
-    // Lọc theo Hashtag
+    // 4. Lọc theo Hashtag đang chọn trên màn hình
     const matchesTag =
       !selectedTag ||
+      dish.hashtags?.some((t) => t.toLowerCase() === selectedTag.toLowerCase()) ||
       dish.tags?.some((t) => t.toLowerCase() === selectedTag.toLowerCase())
 
     return matchesSearch && matchesRegion && matchesTag && matchesVibe
@@ -240,16 +248,17 @@ export function DishList({ dishes }) {
                 >
                   {/* Hình ảnh & Nút Thả Tim */}
                   <div className="relative h-48 w-full overflow-hidden bg-amber-100">
-                    {dish.image && (
+                    {/* Hỗ trợ hiển thị cả imageUrl trực tiếp từ GROQ mới lẫn urlFor cũ */}
+                    {(dish.imageUrl || dish.image) && (
                       <Image
-                        src={urlFor(dish.image).url()}
+                        src={dish.imageUrl || urlFor(dish.image).url()}
                         alt={dish.title || 'Món ăn'}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     )}
                     <span className="absolute top-3 right-3 bg-amber-950/70 backdrop-blur-md text-amber-100 text-xs px-2.5 py-1 rounded-full border border-amber-700/30 font-medium z-10">
-                      {dish.region}
+                      {dish.region === 'mien-bac' ? 'Miền Bắc' : dish.region === 'mien-trung' ? 'Miền Trung' : dish.region === 'mien-nam' ? 'Miền Nam' : dish.region || 'Cả 3 Miền'}
                     </span>
 
                     {/* Nút Bookmark Thả Tim ❤️ */}
@@ -266,6 +275,7 @@ export function DishList({ dishes }) {
                         {isSaved ? '❤️' : '🤍'}
                       </span>
                     </button>
+
                     {/* Nút Chia Sẻ Link Món Ăn */}
                     <button
                       onClick={(e) => handleShareDish(dish, e)}
@@ -277,7 +287,7 @@ export function DishList({ dishes }) {
                       </span>
                     </button>
 
-                    {/* Notification Popup nhỏ khi Copy thành công */}
+                    {/* Popup thông báo nhỏ khi copy link */}
                     {copiedDishId === dish._id && (
                       <span className="absolute bottom-14 right-3 z-20 bg-amber-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg backdrop-blur-sm animate-fade-in">
                         Đã chép link! 📋
@@ -292,14 +302,14 @@ export function DishList({ dishes }) {
                         {dish.title}
                       </h3>
                       <p className="text-amber-800/80 text-sm line-clamp-3 mb-4 leading-relaxed">
-                        {dish.description}
+                        {dish.story || dish.description || 'Món ăn truyền thống đậm đà bản sắc Việt.'}
                       </p>
                     </div>
 
-                    {/* Hashtags & Nút xem thêm */}
+                    {/* Render danh sách Hashtags (Ưu tiên mảng hashtags từ Taxonomy) */}
                     <div>
                       <div className="flex flex-wrap gap-1.5 mb-4">
-                        {dish.tags?.map((tag, idx) => (
+                        {(dish.hashtags || dish.tags)?.map((tag, idx) => (
                           <button
                             key={idx}
                             onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
