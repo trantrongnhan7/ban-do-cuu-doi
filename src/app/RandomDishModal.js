@@ -355,7 +355,38 @@ export default function RandomDishModal({ dishes }) {
                 </Link>
               )}
             </div>
-
+                           {/* 🧪 DEV TEST AUDIO BUTTONS (Chèn vào dòng 358) */}
+            <div className="flex gap-2 mt-4 pt-3 border-t border-slate-800 text-xs justify-center">
+              <span className="text-slate-500 font-mono self-center">Dev Test:</span>
+              <button 
+                type="button"
+                onClick={() => playSound('win_n')} 
+                className="px-2 py-1 bg-emerald-950 text-emerald-400 rounded border border-emerald-800 hover:bg-emerald-900"
+              >
+                🔊 N
+              </button>
+              <button 
+                type="button"
+                onClick={() => playSound('win_r')} 
+                className="px-2 py-1 bg-blue-950 text-blue-400 rounded border border-blue-800 hover:bg-blue-900"
+              >
+                🔊 R
+              </button>
+              <button 
+                type="button"
+                onClick={() => playSound('win_sr')} 
+                className="px-2 py-1 bg-purple-950 text-purple-400 rounded border border-purple-800 hover:bg-purple-900"
+              >
+                🔊 SR
+              </button>
+              <button 
+                type="button"
+                onClick={() => playSound('win_ssr')} 
+                className="px-2 py-1 bg-amber-950 text-amber-400 rounded border border-amber-800 hover:bg-amber-900 font-bold"
+              >
+                🔊 SSR (Vàng Kim)
+              </button>
+            </div>
           </div>
         </div>
       )}
