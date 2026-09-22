@@ -13,62 +13,126 @@ export default {
       name: 'slug',
       title: 'Đường dẫn (Slug)',
       type: 'slug',
-      options: {
-        source: 'title',
-        maxLength: 96,
-      },
-      validation: (Rule) => Rule.required(),
-    },
-    {
-      name: 'region',
-      title: 'Miền',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Miền Bắc', value: 'Miền Bắc' },
-          { title: 'Miền Trung', value: 'Miền Trung' },
-          { title: 'Miền Nam', value: 'Miền Nam' },
-          { title: 'Cả 3 Miền 🇻🇳', value: 'Cả 3 Miền' },
-        ],
-      },
-      validation: (Rule) => Rule.required(),
+      options: { source: 'title', maxLength: 96 },
     },
     {
       name: 'image',
       title: 'Hình ảnh',
       type: 'image',
+      options: { hotspot: true },
+    },
+
+    // 💎 TIER GACHA CHÍNH (Phân hạng hệ thống)
+    {
+      name: 'rarityTier',
+      title: 'Xếp Hạng Tier Gacha',
+      type: 'string',
       options: {
-        hotspot: true,
+        list: [
+          { title: 'N - Bữa Cơm / Bình Dân (Xanh Lá)', value: 'N' },
+          { title: 'R - Đặc Sản Vùng Miền (Xanh Dương)', value: 'R' },
+          { title: 'SR - Tinh Tế / Cầu Kỳ (Tím)', value: 'SR' },
+          { title: 'SSR - Thượng Hạng / Hiếm Có (Vàng Kim)', value: 'SSR' },
+        ],
+        layout: 'radio',
       },
+      initialValue: 'N',
       validation: (Rule) => Rule.required(),
     },
+
+    // 🗺️ ĐỊA PHƯƠNG
     {
-      name: 'description',
-      title: 'Mô tả ngắn',
-      type: 'text',
-      rows: 3,
+      name: 'region',
+      title: 'Vùng Miền',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Miền Bắc', value: 'mien-bac' },
+          { title: 'Miền Trung', value: 'mien-trung' },
+          { title: 'Miền Nam', value: 'mien-nam' },
+          { title: 'Cả 3 Miền', value: 'ca-3-mien' },
+        ],
+      },
     },
+
+    // 🍜 DẠNG MÓN
     {
-      name: 'tags',
-      title: 'Thẻ Hashtag (phân cách bằng dấu phẩy)',
+      name: 'dishType',
+      title: 'Dạng Món Ăn',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Món Sợi (Bún / Phở / Mì / Hủ tiếu)', value: 'mon-soi' },
+          { title: 'Cơm & Xôi', value: 'com-xoi' },
+          { title: 'Bánh Truyền Thống', value: 'banh' },
+          { title: 'Món Lẩu / Canh / Nước', value: 'mon-nuoc' },
+          { title: 'Món Dry / Trộn / Cuốn', value: 'mon-kho' },
+          { title: 'Món Ăn Vặt / Tráng Miệng', value: 'an-vat' },
+        ],
+      },
+    },
+
+    // 🔗 LINK NGUYÊN LIỆU CHÍNH (Reference)
+    {
+      name: 'mainIngredients',
+      title: 'Nguyên Liệu Chính',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'ingredient' }] }],
+    },
+
+    // 🔗 LINK KỸ THUẬT CHẾ BIẾN (Reference)
+    {
+      name: 'cookingMethods',
+      title: 'Kỹ Thuật Chế Biến',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'cookingMethod' }] }],
+    },
+
+    // 🌶️ ĐẶC ĐIỂM VỊ GIÁC
+    {
+      name: 'tasteProfiles',
+      title: 'Đặc Điểm Vị Giác',
       type: 'array',
       of: [{ type: 'string' }],
       options: {
-        layout: 'tags',
+        list: ['Đậm đà', 'Cay', 'Ngọt', 'Chua', 'Béo ngậy', 'Thanh mát', 'Chát / Đắng'],
+      },
+    },
+
+    // 🎯 HOÀN CẢNH & KHUNG GIỜ
+    {
+      name: 'mealTime',
+      title: 'Khung Giờ Thích Hợp',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: {
+        list: ['Sáng', 'Trưa', 'Tối', 'Ăn Khuya', 'Mọi lúc'],
       },
     },
     {
-      name: 'instructions',
-      title: 'Cách chế biến / Công thức',
+      name: 'occasion',
+      title: 'Ngữ Cảnh Ăn Uống',
       type: 'array',
-      of: [{ type: 'block' }],
+      of: [{ type: 'string' }],
+      options: {
+        list: ['Bữa cơm gia đình', 'Đặc sản du lịch', 'Mồi nhậu tán gẫu', 'Ăn chơi nhẹ nhàng', 'Cuối tháng cháy túi'],
+      },
     },
+
+    // 🏷️ LINK BỘ HASHTAG TẬP TRUNG (Reference)
     {
-  name: 'ingredients',
-  title: 'Nguyên liệu',
-  type: 'array',
-  of: [{ type: 'string' }],
-  description: 'Thêm các nguyên liệu cấu thành món ăn (Ví dụ: 500g Bánh phở, 300g Thịt bò...)',
-},
+      name: 'hashtags',
+      title: 'Bộ Thẻ Hashtag',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'hashtag' }] }],
+    },
+
+    // 📖 CÂU CHUYỆN VĂN HÓA & NGUỒN GỐC
+    {
+      name: 'story',
+      title: 'Nguồn Gốc & Câu Chuyện Văn Hóa',
+      type: 'text',
+      rows: 6,
+    },
   ],
 }
