@@ -256,9 +256,13 @@ export default function RandomDishModal({ dishes }) {
           aria-label="Quay Món Ăn Gacha"
           className="group relative p-2 flex flex-col items-center justify-center transition-all duration-300 hover:scale-125 active:scale-95"
         >
-          
+          {/* Lớp Hào Quang Neon nhấp nháy phía sau cùng */}
           <div className="absolute inset-0 rounded-full bg-amber-500/50 blur-xl group-hover:bg-red-500/80 transition-all duration-500 animate-pulse"></div>
+
+          {/* CONTAINER ĐỒNG BỘ NẢY (Cả Vòng Quay và Tô Mì nảy cùng nhịp) */}
           <div className="relative flex items-center justify-center animate-bounce" style={{ animationDuration: '2s' }}>
+            
+            {/* 📍 KIM CHỈ VÒNG QUAY Ở ĐỈNH VÒNG QUAY (Tương tự Standee) */}
             <div className="absolute -top-3 z-20 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[10px] border-t-yellow-300 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"></div>
 
             {/* 🎡 LOGO VÒNG QUAY MAY MẮN (Đỏ - Trắng / Vàng - Xanh sọc xen kẽ có chấm Đèn LED viền) */}
@@ -283,6 +287,7 @@ export default function RandomDishModal({ dishes }) {
               <span className="text-4xl sm:text-5xl">
                 🍜
               </span>
+            </div>
           </div>
 
           {/* 🏷️ CHỮ QUAY MÓN NỔI BẬT PHÍA DƯỚI */}
