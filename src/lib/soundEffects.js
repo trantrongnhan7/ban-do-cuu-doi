@@ -163,16 +163,16 @@ export const playSound = (type) => {
     // 🥣 4. TIER N (Xanh Lá): Tiếng "Ting" 2 nốt đơn nhẹ nhàng
     else {
       const melody = [
-        { freq: 523.25, time: 0, duration: 0.08 },
-        { freq: 659.25, time: 0.08, duration: 0.25 },
+        { freq: 659.25, time: 0, duration: 0.12 },
+        { freq: 880.00, time: 0.08, duration: 0.3 },
       ]
 
       melody.forEach((note) => {
         const osc = ctx.createOscillator()
         const gain = ctx.createGain()
-        osc.type = 'sine'
+        osc.type = 'triangle'
         osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time)
-        gain.gain.setValueAtTime(0.12, ctx.currentTime + note.time)
+        gain.gain.setValueAtTime(0.5, ctx.currentTime + note.time)
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + note.time + note.duration)
         osc.connect(gain)
         gain.connect(ctx.destination)
