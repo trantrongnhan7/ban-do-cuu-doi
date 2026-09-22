@@ -28,6 +28,7 @@ export default {
           { title: 'Miền Bắc', value: 'Miền Bắc' },
           { title: 'Miền Trung', value: 'Miền Trung' },
           { title: 'Miền Nam', value: 'Miền Nam' },
+          { title: 'Cả 3 Miền 🇻🇳', value: 'Cả 3 Miền' },
         ],
       },
       validation: (Rule) => Rule.required(),

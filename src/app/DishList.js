@@ -18,6 +18,7 @@ export function DishList({ dishes }) {
 
     const matchesRegion =
       selectedRegion === 'all' ||
+      dish.region === 'Cả 3 Miền' ||
       dish.region === selectedRegion ||
       (selectedRegion === 'bac' && dish.region === 'Miền Bắc') ||
       (selectedRegion === 'trung' && dish.region === 'Miền Trung') ||
