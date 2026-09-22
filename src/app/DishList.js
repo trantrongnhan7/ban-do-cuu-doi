@@ -9,13 +9,16 @@ import RandomDishModal from './RandomDishModal'
 export function DishList({ dishes }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('all')
+  const [selectedTag, setSelectedTag] = useState(null) // 👈 State lưu tag đang được chọn
 
-  // Lọc danh sách món ăn theo Tìm kiếm và Vùng miền
+  // Lọc danh sách món ăn theo Tìm kiếm, Vùng miền và Hashtag
   const filteredDishes = dishes.filter((dish) => {
+    // Tìm kiếm theo tên hoặc mô tả
     const matchesSearch =
       dish.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dish.description?.toLowerCase().includes(searchQuery.toLowerCase())
 
+    // Lọc theo Vùng miền
     const matchesRegion =
       selectedRegion === 'all' ||
       dish.region === 'Cả 3 Miền' ||
@@ -24,7 +27,12 @@ export function DishList({ dishes }) {
       (selectedRegion === 'trung' && dish.region === 'Miền Trung') ||
       (selectedRegion === 'nam' && dish.region === 'Miền Nam')
 
-    return matchesSearch && matchesRegion
+    // Lọc theo Hashtag nhấp chọn
+    const matchesTag =
+      !selectedTag ||
+      dish.tags?.some((t) => t.toLowerCase() === selectedTag.toLowerCase())
+
+    return matchesSearch && matchesRegion && matchesTag
   })
 
   return (
@@ -40,7 +48,7 @@ export function DishList({ dishes }) {
       </header>
 
       {/* Thanh Tìm kiếm & Bộ lọc Vùng miền */}
-      <section className="max-w-4xl mx-auto mb-10 space-y-4">
+      <section className="max-w-4xl mx-auto mb-8 space-y-4">
         {/* Input Tìm kiếm */}
         <div className="relative">
           <input
@@ -74,6 +82,23 @@ export function DishList({ dishes }) {
             </button>
           ))}
         </div>
+
+        {/* Hiển thị Tag đang được lọc (nếu có) */}
+        {selectedTag && (
+          <div className="flex items-center justify-center gap-2 pt-2 animate-fade-in">
+            <span className="text-xs text-amber-800 font-medium">Đang lọc theo tag:</span>
+            <span className="inline-flex items-center gap-1.5 bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+              #{selectedTag}
+              <button
+                onClick={() => setSelectedTag(null)}
+                className="hover:bg-amber-700 w-4 h-4 rounded-full flex items-center justify-center text-xs ml-0.5"
+                title="Bỏ lọc tag"
+              >
+                ✕
+              </button>
+            </span>
+          </div>
+        )}
       </section>
 
       {/* Danh sách Món ăn Grid */}
@@ -111,16 +136,21 @@ export function DishList({ dishes }) {
                     </p>
                   </div>
 
-                  {/* Tags & Nút xem thêm */}
+                  {/* Hashtags & Nút xem thêm */}
                   <div>
                     <div className="flex flex-wrap gap-1.5 mb-4">
                       {dish.tags?.map((tag, idx) => (
-                        <span
+                        <button
                           key={idx}
-                          className="bg-amber-50 text-amber-700 text-xs px-2 py-0.5 rounded border border-amber-200/50"
+                          onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                          className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
+                            selectedTag?.toLowerCase() === tag.toLowerCase()
+                              ? 'bg-amber-600 text-white font-bold shadow-sm scale-105'
+                              : 'bg-amber-50 text-amber-700 hover:bg-amber-200 border border-amber-200/60'
+                          }`}
                         >
                           #{tag}
-                        </span>
+                        </button>
                       ))}
                     </div>
                     <Link
@@ -137,26 +167,31 @@ export function DishList({ dishes }) {
         ) : (
           /* Trạng thái không tìm thấy món */
           <div className="text-center py-12 px-4 bg-amber-50/50 rounded-2xl border border-dashed border-amber-200/80 my-6">
-    <div className="relative inline-block mb-3">
-      <span className="text-5xl block animate-bounce">🥣</span>
-      <span className="absolute -top-1 -right-2 text-xl">❌</span>
-    </div>
-    
-    <h3 className="text-lg font-extrabold text-amber-950 mb-1">
-      Bếp hết món này rồi bạn ơi!
-    </h3>
-    
-    <p className="text-amber-800/80 text-sm max-w-sm mx-auto leading-relaxed italic mb-4">
-      "Đầu bếp tìm hoài trong bếp mà không thấy món này đâu... Có vẻ như từ khóa bị sai hoặc món ăn đã bị ai đó 'chén' mất rồi!"
-    </p>
+            <div className="relative inline-block mb-3">
+              <span className="text-5xl block animate-bounce">🥣</span>
+              <span className="absolute -top-1 -right-2 text-xl">❌</span>
+            </div>
+            <h3 className="text-lg font-extrabold text-amber-950 mb-1">
+              Bếp hết món này rồi bạn ơi!
+            </h3>
+            
+            <p className="text-amber-800/80 text-sm max-w-sm mx-auto leading-relaxed italic mb-4">
+              "Đầu bếp tìm hoài trong bếp mà không thấy món nào phù hợp... Bạn thử bỏ lọc bớt tag hoặc đổi từ khóa nhé!"
+            </p>
 
-    <span className="inline-block text-xs font-mono bg-amber-100 text-amber-800 px-3 py-1 rounded-full border border-amber-200">
-      💡 Gợi ý: Tìm "Phở", "Bún", "Cơm" hoặc đổi vùng miền nhé!
-    </span>
-  </div>
+            {selectedTag && (
+              <button
+                onClick={() => setSelectedTag(null)}
+                className="inline-block text-xs font-bold bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition-colors shadow-sm"
+              >
+                Bỏ lọc #{selectedTag} ✕
+              </button>
+            )}
+          </div>
         )}
       </section>
-      {/* Vòng quay ngẫu nhiên đặt cố định ở góc màn hình */}
+
+      {/* Vòng quay ngẫu nhiên */}
       <RandomDishModal dishes={dishes} />
     </main>
   )
