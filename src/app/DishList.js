@@ -131,7 +131,7 @@ export function DishList({ dishes }) {
           {/* Giữ nguyên màu chữ nâu mộc mạc cũ */}
           <div className="text-center sm:text-left">
             <h1 className="font-[family-name:var(--font-playful)] text-3xl sm:text-5xl font-black text-amber-950 mb-2">
-              🥢 Bản Đồ Cứu Đói 🍺
+              🥢 Bản Đồ Vị Giác 🍺
             </h1>
             <p className="font-[family-name:var(--font-mono)] text-xs sm:text-sm text-amber-800 bg-amber-100/90 inline-block px-3 py-1 rounded-md border border-amber-200">
               &gt; Bản đồ vị giác 3 miền: Lưu giữ hương vị xưa bằng góc nhìn mới_
