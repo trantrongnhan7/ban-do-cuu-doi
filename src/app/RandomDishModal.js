@@ -1,5 +1,6 @@
 'use client'
 
+import { playSound } from '@/lib/soundEffects'
 import { useState, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -87,6 +88,7 @@ function selectWeightedRandomDish(dishes) {
 
 // Bắn Pháo Hoa Kim Tuyến
 function triggerConfetti(tier) {
+  playSound('win')
   if (tier === 'UR') {
     // Pháo hoa siêu lớn cho UR (bắn 3 đợt liên tiếp)
     const count = 200
@@ -126,6 +128,7 @@ export default function RandomDishModal({ dishes }) {
   const stripRef = useRef(null)
 
   const handleOpenAndSpin = () => {
+    playSound('spin')
     if (!dishes || dishes.length === 0) return
     setIsOpen(true)
     startCS2Spin()
