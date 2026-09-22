@@ -24,7 +24,7 @@ function getRarityInfo(tags = []) {
     ['hiem', 'hiemco', 'khotim', 'docla', 'thuonghang', 'hiemco'].includes(t)
   )
   const isSSR = normalizedTags.some(t =>
-    ['haisan', 'lehoi', 'damdo', 'tiec', 'xaxi'].includes(t)
+    ['haisan', 'lehoi', 'damdo', 'damtiec', 'xaxi'].includes(t)
   )
   const isSR = normalizedTags.some(t =>
     ['dacsan', 'anchoi', 'moinhau', 'haocom'].includes(t)
