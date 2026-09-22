@@ -129,16 +129,15 @@ export default {
     },
     {
       name: 'occasion',
-      title: 'Ngữ Cảnh Ăn Uống',
+      title: 'Ngữ Cảnh Ăn Uống (Vibe Cứu Đói)',
       type: 'array',
       of: [{ type: 'string' }],
       options: {
         list: [
-          { title: 'Bữa Cơm Hằng Ngày', value: 'bua-com-hang-ngay' },
-          { title: 'Đặc Sản Du Lịch', value: 'dac-san-du-lich' },
-          { title: 'Mồi Nhậu Tán Gẫu', value: 'moi-nhau-tan-gau' },
-          { title: 'Ăn Vặt Ăn Chơi', value: 'an-vat-an-choi' },
-          { title: 'Cuối Tháng Cháy Túi', value: 'cuoi-thang-chay-tui' },
+          { title: '💸 Cuối Tháng Cháy Túi', value: 'cuoi-thang-chay-tui' },
+          { title: '🌧️ Trú Lạnh / Ngày Mưa', value: 'tru-lanh-ngay-mua' },
+          { title: '☕ Ăn Chơi Tán Gẫu', value: 'an-choi-tan-gau' },
+          { title: '🍺 Nhậu Tới Bến', value: 'nhau-toi-ben' },
         ],
       },
     },

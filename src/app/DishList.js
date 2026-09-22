@@ -91,22 +91,22 @@ export function DishList({ dishes }) {
 
         if (selectedVibe === 'chaytui') {
           return allDishMeta.some((meta) =>
-            ['cuoithang', 'cuoithangchaytui', 'tietkiem', 'haocom', 're', 'combinhdan', 'binhdan'].some((k) => meta.includes(k))
+            ['cuoi-thang-chay-tui', 'cuoithang', 'tietkiem', 'haocom'].some((k) => meta.includes(k))
           )
         }
         if (selectedVibe === 'troilanh') {
           return allDishMeta.some((meta) =>
-            ['mualanh', 'troilanh', 'monnong', 'lau', 'cay', 'noilau', 'hot', 'monnuoc'].some((k) => meta.includes(k))
+            ['tru-lanh-ngay-mua', 'troilanh', 'mualanh', 'monnong', 'lau', 'cay'].some((k) => meta.includes(k))
           )
         }
         if (selectedVibe === 'anchoi') {
           return allDishMeta.some((meta) =>
-            ['anchoi', 'anvat', 'che', 'anvatanchoi'].some((k) => meta.includes(k))
+            ['an-choi-tan-gau', 'anchoi', 'anvat', 'che'].some((k) => meta.includes(k))
           )
         }
         if (selectedVibe === 'nhau') {
           return allDishMeta.some((meta) =>
-            ['nhau', 'moinhau', 'moinhautan-gau', 'haisan'].some((k) => meta.includes(k))
+            ['nhau-toi-ben', 'nhau', 'moinhau', 'haisan'].some((k) => meta.includes(k))
           )
         }
         return true
