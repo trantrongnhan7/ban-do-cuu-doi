@@ -129,7 +129,7 @@ export const playSound = (type) => {
         const gain = ctx.createGain()
         osc.type = 'triangle'
         osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time)
-        gain.gain.setValueAtTime(0.22, ctx.currentTime + note.time)
+        gain.gain.setValueAtTime(0.6, ctx.currentTime + note.time)
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + note.time + note.duration)
         osc.connect(gain)
         gain.connect(ctx.destination)
@@ -151,7 +151,7 @@ export const playSound = (type) => {
         const gain = ctx.createGain()
         osc.type = 'square'
         osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time)
-        gain.gain.setValueAtTime(0.15, ctx.currentTime + note.time)
+        gain.gain.setValueAtTime(0.35, ctx.currentTime + note.time)
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + note.time + note.duration)
         osc.connect(gain)
         gain.connect(ctx.destination)
