@@ -19,6 +19,13 @@ export const playSound = (type) => {
 
   // 1. Tiếng LẠCH CẠCH CS2
   if (type === 'tick' || type === 'spin') {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try {
+        navigator.vibrate(12) // Rung nhấp nhẹ 12ms đúng nhịp ô lướt qua
+      } catch (e) {
+        // Bỏ qua nếu trình duyệt chặn
+      }
+    }
     try {
       const ctx = getAudioContext()
       if (!ctx) return
