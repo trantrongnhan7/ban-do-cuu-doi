@@ -18,69 +18,58 @@ function removeVietnameseTones(str) {
     .replace(/\s+/g, '')
 }
 
-function getRarityInfo(tags = []) {
-  const normalizedTags = tags.map(t => removeVietnameseTones(t))
+export const getRarityInfo = (dish) => {
+  // Ưu tiên đọc trường rarityTier trực tiếp từ Sanity Studio
+  // Nếu không có thì mới tìm trong mảng hashtags hoặc tags cũ
+  const tier =
+    dish?.rarityTier ||
+    (dish?.hashtags?.includes('SSR') || dish?.tags?.includes('SSR') ? 'SSR' :
+     dish?.hashtags?.includes('SR') || dish?.tags?.includes('SR') ? 'SR' :
+     dish?.hashtags?.includes('R') || dish?.tags?.includes('R') ? 'R' : 'N');
 
-  const isSSR = normalizedTags.some(t =>
-    ['hiem', 'hiemco', 'khotim', 'docla', 'thuonghang', 'xaxi'].includes(t)
-  )
-  const isSR = normalizedTags.some(t =>
-    ['haisan', 'lehoi', 'anchoi', 'moinhau'].includes(t)
-  )
-  const isR = normalizedTags.some(t =>
-    ['damdo', 'damtiec', 'dacsan', 'haocom'].includes(t)
-  )
-
-  // 💎 1. TIER SSR (Siêu Phẩm / Cực Hiếm - Vàng Kim)
-  if (isSSR) {
-    return {
-      tier: 'SSR',
-      label: 'SSR - Siêu Phẩm 💎',
-      border: 'border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.9)]',
-      bg: 'bg-gradient-to-b from-amber-400/30 via-amber-500/40 to-orange-600/50',
-      badge: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black animate-bounce shadow-lg',
-      glow: 'shadow-[0_0_60px_rgba(245,158,11,0.9)] ring-4 ring-amber-400',
-      weight: 1
-    }
+  switch (tier) {
+    case 'SSR':
+      return {
+        tier: 'SSR',
+        label: 'SSR - Siêu Phẩm 💎',
+        border: 'border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.9)]',
+        bg: 'bg-gradient-to-b from-amber-400/30 via-amber-500/40 to-orange-600/50',
+        badge: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black animate-bounce shadow-lg',
+        glow: 'shadow-[0_0_60px_rgba(245,158,11,0.9)] ring-4 ring-amber-400',
+        weight: 1,
+      };
+    case 'SR':
+      return {
+        tier: 'SR',
+        label: 'SR - Xa Xỉ 🌟',
+        border: 'border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.7)]',
+        bg: 'bg-gradient-to-b from-purple-500/30 to-indigo-600/40',
+        badge: 'bg-purple-600 text-white font-bold shadow-md',
+        glow: 'shadow-[0_0_40px_rgba(168,85,247,0.6)] ring-2 ring-purple-500',
+        weight: 2,
+      };
+    case 'R':
+      return {
+        tier: 'R',
+        label: 'R - Đặc Sản 🍜',
+        border: 'border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]',
+        bg: 'bg-gradient-to-b from-cyan-500/30 to-blue-600/40',
+        badge: 'bg-cyan-600 text-white font-bold shadow-md',
+        glow: 'shadow-[0_0_30px_rgba(6,182,212,0.5)] ring-2 ring-cyan-400',
+        weight: 3,
+      };
+    default:
+      return {
+        tier: 'N',
+        label: 'N - Bình Dân 🍚',
+        border: 'border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]',
+        bg: 'bg-gradient-to-b from-emerald-500/20 to-green-600/30',
+        badge: 'bg-emerald-600 text-white font-bold shadow-sm',
+        glow: 'shadow-[0_0_20px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400',
+        weight: 4,
+      };
   }
-
-  // 🌟 2. TIER SR (Xa Xỉ / Hiếm - Tím)
-  if (isSR) {
-    return {
-      tier: 'SR',
-      label: 'SR - Xa Xỉ 🌟',
-      border: 'border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.7)]',
-      bg: 'bg-gradient-to-b from-purple-500/30 to-indigo-600/40',
-      badge: 'bg-purple-600 text-white font-bold shadow-md',
-      glow: 'shadow-[0_0_40px_rgba(168,85,247,0.6)] ring-2 ring-purple-500',
-      weight: 2
-    }
-  }
-
-  // 🔷 3. TIER R (Đặc Sản / Khá - Xanh Dương)
-  if (isR) {
-    return {
-      tier: 'R',
-      label: 'R - Đặc Sản 🔷',
-      border: 'border-blue-400 shadow-blue-400/50',
-      bg: 'bg-gradient-to-b from-blue-400/20 to-cyan-500/30',
-      badge: 'bg-blue-600 text-white font-bold',
-      glow: '',
-      weight: 4
-    }
-  }
-
-  // 🥣 4. TIER N (Bữa Cơm / Thường - Xanh Lá)
-  return {
-    tier: 'N',
-    label: 'N - Bữa Cơm 🥣',
-    border: 'border-emerald-400 shadow-emerald-400/30',
-    bg: 'bg-gradient-to-b from-emerald-400/10 to-teal-500/20',
-    badge: 'bg-emerald-600 text-white font-medium',
-    glow: '',
-    weight: 8
-  }
-}
+};
 
 function selectWeightedRandomDish(dishes) {
   const weightedList = []
@@ -333,20 +322,24 @@ export default function RandomDishModal({ dishes }) {
                 style={{ willChange: 'transform' }}
               >
                 {stripDishes.map((dish, index) => {
-                  const rarity = getRarityInfo(dish.tags)
+                  const rarity = getRarityInfo(dish)
                   return (
                     <div
                       key={index}
                       className={`w-[120px] h-[140px] shrink-0 rounded-xl border-2 p-2 flex flex-col items-center justify-between transition-all ${rarity.border} ${rarity.bg} shadow-md`}
                     >
                       <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/20 mt-1">
-                        {dish.image && (
-                          <Image
-                            src={urlFor(dish.image).url()}
-                            alt={dish.title || 'Món'}
-                            fill
-                            className="object-cover"
-                          />
+                        {dish.imageUrl || dish.image ? (
+                      <Image
+                        src={dish.imageUrl || urlFor(dish.image).url()}
+                        alt={dish.title || 'Món'}
+                        fill
+                       className="object-cover"
+                    />
+                      ) : (
+                     <div className="w-full h-full bg-slate-800 flex items-center justify-center text-xl">
+                       🍲
+                    </div>
                         )}
                       </div>
                       <span className="text-[11px] font-bold text-white truncate w-full px-1">
