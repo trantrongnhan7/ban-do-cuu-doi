@@ -196,7 +196,7 @@ export default function RandomDishModal({ dishes }) {
     <>
       <button
         onClick={handleOpenAndSpin}
-        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-red-600 via-amber-500 to-orange-500 hover:scale-105 text-white font-extrabold py-3.5 px-6 rounded-full shadow-2xl border-2 border-amber-300 flex items-center gap-2 transition-all active:scale-95 animate-bounce"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-gradient-to-r from-red-600 via-amber-500 to-orange-500 hover:scale-105 text-white font-extrabold py-2.5 px-4 sm:py-3.5 sm:px-6 rounded-full shadow-2xl border-2 border-amber-300 flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 animate-bounce text-xs sm:text-base"
       >
         <span className="text-2xl">🧰</span>
         <span className="tracking-wide">Mở Hòm Cứu Đói </span>
@@ -204,7 +204,7 @@ export default function RandomDishModal({ dishes }) {
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg">
-          <div className={`bg-slate-900 border-2 rounded-3xl p-6 max-w-xl w-full relative text-center overflow-hidden transition-all duration-500 ${
+          <div className={`bg-slate-900 border-2 rounded-2xl sm:rounded-3xl p-4 sm:p-6 max-w-xl w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto relative text-center transition-all duration-500 ${
             winningRarity?.glow ? winningRarity.glow : 'border-amber-500/40 shadow-[0_0_50px_rgba(245,158,11,0.2)]'
           }`}>
             

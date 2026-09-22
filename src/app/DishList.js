@@ -11,6 +11,7 @@ export function DishList({ dishes }) {
   const [selectedRegion, setSelectedRegion] = useState('all')
   const [selectedTag, setSelectedTag] = useState(null)
   const [selectedVibe, setSelectedVibe] = useState(null)
+  const [copiedDishId, setCopiedDishId] = useState(null)
   // State lưu danh sách ID các món ăn đã bookmark (thả tim)
   const [bookmarkedIds, setBookmarkedIds] = useState([])
 
@@ -45,7 +46,21 @@ export function DishList({ dishes }) {
       console.error('Không thể lưu bookmark vào localStorage', e)
     }
   }
+// Hàm xử lý copy link bài viết
+  const handleShareDish = (dish, e) => {
+    e.preventDefault()
+    e.stopPropagation()
 
+    const slug = typeof dish.slug === 'string' ? dish.slug : dish.slug?.current || dish._id
+    const shareUrl = `${window.location.origin}/recipe/${slug}`
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        setCopiedDishId(dish._id)
+        setTimeout(() => setCopiedDishId(null), 2000)
+      })
+    }
+  }
   // Lọc danh sách món ăn theo Tìm kiếm, Vùng miền / Bookmark, và Hashtag
   const filteredDishes = dishes.filter((dish) => {
     // Tìm kiếm theo tên hoặc mô tả
@@ -230,6 +245,23 @@ export function DishList({ dishes }) {
                         {isSaved ? '❤️' : '🤍'}
                       </span>
                     </button>
+                    {/* Nút Chia Sẻ Link Món Ăn */}
+                    <button
+                      onClick={(e) => handleShareDish(dish, e)}
+                      title="Chia sẻ món ăn này"
+                      className="absolute top-3 left-14 z-10 w-9 h-9 rounded-full flex items-center justify-center bg-white/80 hover:bg-white text-gray-600 hover:text-amber-600 backdrop-blur-md shadow-sm transition-all active:scale-125"
+                    >
+                      <span className="text-sm">
+                        {copiedDishId === dish._id ? '✅' : '🔗'}
+                      </span>
+                    </button>
+
+                    {/* Notification Popup nhỏ khi Copy thành công */}
+                    {copiedDishId === dish._id && (
+                      <span className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-amber-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg backdrop-blur-sm animate-fade-in">
+                        Đã chép link! 📋
+                      </span>
+                    )}
                   </div>
 
                   {/* Nội dung card */}
