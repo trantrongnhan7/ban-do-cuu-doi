@@ -61,7 +61,7 @@ export default async function RecipeDetail({ params }) {
     { region: dish.region, id: dish._id }
   )
   {/* Khối hiển thị 3 món gợi ý */}
-{relatedDishes && relatedDishes.length > 0 && (
+
   <section className="mt-10 pt-8 border-t border-amber-200/60">
     <h3 className="text-lg font-bold text-amber-950 mb-4 flex items-center gap-2">
       🍲 Món ngon khác ở {dish.region}
@@ -90,7 +90,7 @@ export default async function RecipeDetail({ params }) {
       ))}
     </div>
   </section>
-)}
+
   return (
     <main className="min-h-screen bg-amber-50/40 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
