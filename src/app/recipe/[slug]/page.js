@@ -147,12 +147,16 @@ export default async function RecipeDetail({ params }) {
         {/* Khối hiển thị Món ăn cùng vùng miền (Layout dọc cân đối & Đẹp mắt) */}
         {relatedDishes && relatedDishes.length > 0 && (
           <section className="mt-12 pt-8 border-t border-amber-200/80">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg sm:text-xl font-bold text-amber-950 flex items-center gap-2">
-                <span>🍲</span> Món Ngon Khác Ở {dish.region}
-              </h3>
-              <span className="text-[11px] font-semibold text-amber-800 bg-amber-100/80 px-3 py-1 rounded-full border border-amber-200/60">
-                Gợi ý cùng vị
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+              <div className="flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-2xl shadow-lg border border-amber-300/40">
+                <span className="text-xl">🍲</span>
+                <h3 className="text-base sm:text-lg font-black tracking-wide uppercase">
+                  Món Ngon Khác Ở {dish.region}
+                </h3>
+              </div>
+
+              <span className="text-xs font-bold text-amber-900 bg-amber-100 px-3.5 py-1.5 rounded-full border border-amber-300 shadow-sm">
+                ✨ Gợi ý cùng vị
               </span>
             </div>
 
