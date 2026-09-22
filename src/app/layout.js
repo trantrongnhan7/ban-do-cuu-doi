@@ -23,7 +23,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 })
 
 export const metadata = {
-  title: 'Bản Đồ Vị Giác',
+  title: 'Bản Đồ Cứu Đói',
   description: 'Bản đồ ẩm thực ba miền',
 }
 
