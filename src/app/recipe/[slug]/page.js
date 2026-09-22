@@ -30,7 +30,7 @@ export async function generateMetadata({ params }) {
 export default async function RecipeDetail({ params }) {
   const { slug } = await params
 
-  // BƯỚC A: Tìm món ăn hiện tại trước
+  // BƯỚC A: Tìm món ăn hiện tại
   const dish = await client.fetch(
     `*[_type == "recipe" && slug.current == $slug][0] {
       _id,
@@ -49,7 +49,7 @@ export default async function RecipeDetail({ params }) {
     notFound()
   }
 
-  // BƯỚC C: Sau khi đã có 'dish', tìm 3 món ăn cùng vùng miền (trừ món hiện tại)
+  // BƯỚC C: Tìm 3 món ăn cùng vùng miền (trừ món hiện tại)
   const relatedDishes = await client.fetch(
     `*[_type == "recipe" && region == $region && _id != $id][0...3] {
       _id,
@@ -60,36 +60,6 @@ export default async function RecipeDetail({ params }) {
     }`,
     { region: dish.region, id: dish._id }
   )
-  {/* Khối hiển thị 3 món gợi ý */}
-
-  <section className="mt-10 pt-8 border-t border-amber-200/60">
-    <h3 className="text-lg font-bold text-amber-950 mb-4 flex items-center gap-2">
-      🍲 Món ngon khác ở {dish.region}
-    </h3>
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {relatedDishes.map((item) => (
-        <Link
-          key={item._id}
-          href={`/recipe/${item.slug}`}
-          className="group bg-white p-3 rounded-2xl border border-amber-100 shadow-sm hover:shadow-md transition-all flex sm:flex-col items-center gap-3"
-        >
-          {item.image && (
-            <div className="relative w-16 h-16 sm:w-full sm:h-28 rounded-xl overflow-hidden flex-shrink-0">
-              <Image
-                src={urlFor(item.image).url()}
-                alt={item.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-          )}
-          <span className="font-semibold text-amber-900 text-sm group-hover:text-amber-700">
-            {item.title}
-          </span>
-        </Link>
-      ))}
-    </div>
-  </section>
 
   return (
     <main className="min-h-screen bg-amber-50/40 py-10 px-4 sm:px-6 lg:px-8">
@@ -98,12 +68,13 @@ export default async function RecipeDetail({ params }) {
         <Link
           href="/"
           className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-amber-100/80 text-amber-950 font-bold text-sm rounded-full border border-amber-300/80 shadow-sm hover:shadow transition-all mb-6 group"
->
-  <span className="text-amber-600 group-hover:-translate-x-1 transition-transform">←</span>
-  <span>Trở về danh sách món ăn</span>
+        >
+          <span className="text-amber-600 group-hover:-translate-x-1 transition-transform">←</span>
+          <span>Trở về danh sách món ăn</span>
         </Link>
 
-        <article className="bg-white rounded-3xl overflow-hidden border border-amber-200/80 shadow-md">
+        {/* Thẻ Chi Tiết Món Ăn */}
+        <article className="bg-white rounded-3xl overflow-hidden border border-amber-200/80 shadow-md mb-8">
           {/* Hình ảnh đại diện */}
           <div className="relative h-72 sm:h-96 w-full bg-amber-100">
             <Image
@@ -114,7 +85,7 @@ export default async function RecipeDetail({ params }) {
               priority
             />
             <span className="absolute top-4 right-4 bg-amber-950/80 backdrop-blur-md text-amber-100 text-xs px-3 py-1.5 rounded-full border border-amber-700/40 font-medium">
-              {dish.regionName}
+              {dish.region}
             </span>
           </div>
 
@@ -127,11 +98,16 @@ export default async function RecipeDetail({ params }) {
             {/* Các tags */}
             <div className="flex flex-wrap gap-2 mb-8">
               {dish.tags?.map((tag, idx) => (
-                <span key={idx} className="bg-amber-100/70 text-amber-800 text-xs px-2.5 py-1 rounded-md font-medium border border-amber-200">
+                <span
+                  key={idx}
+                  className="bg-amber-100/70 text-amber-800 text-xs px-2.5 py-1 rounded-md font-medium border border-amber-200"
+                >
                   #{tag}
                 </span>
               ))}
             </div>
+
+            {/* Câu chuyện món ăn */}
             <section className="mb-8">
               <h2 className="font-[family-name:var(--font-mono)] text-lg font-bold text-amber-900 border-b border-amber-200 pb-2 mb-3">
                 &gt; Câu chuyện món ăn_
@@ -140,28 +116,65 @@ export default async function RecipeDetail({ params }) {
                 {dish.description}
               </p>
             </section>
-            <section className="bg-amber-50/60 p-5 rounded-2xl border border-amber-200/60">
-  <h3 className="font-[family-name:var(--font-mono)] text-base font-bold text-amber-900 mb-3 flex items-center gap-2">
-    🛒 Nguyên liệu chính
-  </h3>
 
-  {dish.ingredients && dish.ingredients.length > 0 ? (
-    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-amber-900">
-      {dish.ingredients.map((item, idx) => (
-        <li key={idx} className="flex items-center gap-2 bg-white/80 px-3 py-2 rounded-lg border border-amber-100 shadow-sm">
-          <span className="text-amber-600 font-bold">•</span>
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <p className="text-xs text-amber-700/70 italic">
-      Chưa cập nhật thông tin nguyên liệu cho món ăn này.
-    </p>
-  )}
-</section>
+            {/* Nguyên liệu chính */}
+            <section className="bg-amber-50/60 p-5 rounded-2xl border border-amber-200/60">
+              <h3 className="font-[family-name:var(--font-mono)] text-base font-bold text-amber-900 mb-3 flex items-center gap-2">
+                🛒 Nguyên liệu chính
+              </h3>
+
+              {dish.ingredients && dish.ingredients.length > 0 ? (
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-amber-900">
+                  {dish.ingredients.map((item, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-center gap-2 bg-white/80 px-3 py-2 rounded-lg border border-amber-100 shadow-sm"
+                    >
+                      <span className="text-amber-600 font-bold">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-amber-700/70 italic">
+                  Chưa cập nhật thông tin nguyên liệu cho món ăn này.
+                </p>
+              )}
+            </section>
           </div>
         </article>
+
+        {/* Khối hiển thị Món ăn cùng vùng miền */}
+        {relatedDishes && relatedDishes.length > 0 && (
+          <section className="mt-8 pt-8 border-t border-amber-200/60">
+            <h3 className="text-lg font-bold text-amber-950 mb-4 flex items-center gap-2">
+              🍲 Món ngon khác ở {dish.region}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {relatedDishes.map((item) => (
+                <Link
+                  key={item._id}
+                  href={`/recipe/${item.slug}`}
+                  className="group bg-white p-3 rounded-2xl border border-amber-100 shadow-sm hover:shadow-md transition-all flex sm:flex-col items-center gap-3"
+                >
+                  {item.image && (
+                    <div className="relative w-16 h-16 sm:w-full sm:h-28 rounded-xl overflow-hidden flex-shrink-0">
+                      <Image
+                        src={urlFor(item.image).url()}
+                        alt={item.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+                  <span className="font-semibold text-amber-900 text-sm group-hover:text-amber-700 line-clamp-1">
+                    {item.title}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   )
