@@ -264,9 +264,6 @@ export default function RandomDishModal({ dishes }) {
             <span className="text-4xl sm:text-5xl animate-bounce" style={{ animationDuration: '2s' }}>
               🍜
             </span>
-            <span className="absolute -top-2 -right-3 text-xl sm:text-2xl animate-pulse" style={{ animationDuration: '1s' }}>
-              🥢
-            </span>
           </div>
 
           {/* Chữ QUAY MÓN phát sáng đổ bóng nổi bật */}
