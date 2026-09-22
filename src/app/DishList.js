@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
@@ -9,25 +9,65 @@ import RandomDishModal from './RandomDishModal'
 export function DishList({ dishes }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('all')
-  const [selectedTag, setSelectedTag] = useState(null) // 👈 State lưu tag đang được chọn
+  const [selectedTag, setSelectedTag] = useState(null)
+  
+  // State lưu danh sách ID các món ăn đã bookmark (thả tim)
+  const [bookmarkedIds, setBookmarkedIds] = useState([])
 
-  // Lọc danh sách món ăn theo Tìm kiếm, Vùng miền và Hashtag
+  // Lấy danh sách bookmark từ localStorage khi vừa tải trang
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('saved_dishes_cuudoi')
+      if (saved) {
+        setBookmarkedIds(JSON.parse(saved))
+      }
+    } catch (e) {
+      console.error('Không thể đọc dữ liệu bookmark từ localStorage', e)
+    }
+  }, [])
+
+  // Bật / Tắt trạng thái thả tim cho một món ăn
+  const toggleBookmark = (dishId, e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    let updatedList = []
+    if (bookmarkedIds.includes(dishId)) {
+      updatedList = bookmarkedIds.filter((id) => id !== dishId)
+    } else {
+      updatedList = [...bookmarkedIds, dishId]
+    }
+
+    setBookmarkedIds(updatedList)
+    try {
+      localStorage.setItem('saved_dishes_cuudoi', JSON.stringify(updatedList))
+    } catch (e) {
+      console.error('Không thể lưu bookmark vào localStorage', e)
+    }
+  }
+
+  // Lọc danh sách món ăn theo Tìm kiếm, Vùng miền / Bookmark, và Hashtag
   const filteredDishes = dishes.filter((dish) => {
     // Tìm kiếm theo tên hoặc mô tả
     const matchesSearch =
       dish.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dish.description?.toLowerCase().includes(searchQuery.toLowerCase())
 
-    // Lọc theo Vùng miền
-    const matchesRegion =
-      selectedRegion === 'all' ||
-      dish.region === 'Cả 3 Miền' ||
-      dish.region === selectedRegion ||
-      (selectedRegion === 'bac' && dish.region === 'Miền Bắc') ||
-      (selectedRegion === 'trung' && dish.region === 'Miền Trung') ||
-      (selectedRegion === 'nam' && dish.region === 'Miền Nam')
+    // Lọc theo Vùng miền hoặc Tab "Đã Lưu"
+    let matchesRegion = true
+    if (selectedRegion === 'saved') {
+      matchesRegion = bookmarkedIds.includes(dish._id)
+    } else {
+      matchesRegion =
+        selectedRegion === 'all' ||
+        dish.region === 'Cả 3 Miền' ||
+        dish.region === selectedRegion ||
+        (selectedRegion === 'bac' && dish.region === 'Miền Bắc') ||
+        (selectedRegion === 'trung' && dish.region === 'Miền Trung') ||
+        (selectedRegion === 'nam' && dish.region === 'Miền Nam')
+    }
 
-    // Lọc theo Hashtag nhấp chọn
+    // Lọc theo Hashtag
     const matchesTag =
       !selectedTag ||
       dish.tags?.some((t) => t.toLowerCase() === selectedTag.toLowerCase())
@@ -47,7 +87,7 @@ export function DishList({ dishes }) {
         </p>
       </header>
 
-      {/* Thanh Tìm kiếm & Bộ lọc Vùng miền */}
+      {/* Thanh Tìm kiếm & Bộ lọc Vùng miền + Bookmark */}
       <section className="max-w-4xl mx-auto mb-8 space-y-4">
         {/* Input Tìm kiếm */}
         <div className="relative">
@@ -61,13 +101,14 @@ export function DishList({ dishes }) {
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg">🍜</span>
         </div>
 
-        {/* Các nút lọc Vùng miền */}
+        {/* Các nút lọc Vùng miền & Tab Món đã lưu */}
         <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
           {[
             { id: 'all', label: 'Tất Cả 🥢' },
             { id: 'bac', label: 'Miền Bắc 🏔️' },
             { id: 'trung', label: 'Miền Trung 🌊' },
             { id: 'nam', label: 'Miền Nam 🌴' },
+            { id: 'saved', label: `Đã Lưu ❤️ (${bookmarkedIds.length})` },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -83,7 +124,7 @@ export function DishList({ dishes }) {
           ))}
         </div>
 
-        {/* Hiển thị Tag đang được lọc (nếu có) */}
+        {/* Hiển thị Tag đang được chọn (nếu có) */}
         {selectedTag && (
           <div className="flex items-center justify-center gap-2 pt-2 animate-fade-in">
             <span className="text-xs text-amber-800 font-medium">Đang lọc theo tag:</span>
@@ -105,78 +146,101 @@ export function DishList({ dishes }) {
       <section className="max-w-6xl mx-auto">
         {filteredDishes.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDishes.map((dish) => (
-              <article
-                key={dish._id}
-                className="bg-white rounded-2xl overflow-hidden border border-amber-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
-              >
-                {/* Hình ảnh */}
-                <div className="relative h-48 w-full overflow-hidden bg-amber-100">
-                  {dish.image && (
-                    <Image
-                      src={urlFor(dish.image).url()}
-                      alt={dish.title || 'Món ăn'}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  )}
-                  <span className="absolute top-3 right-3 bg-amber-950/70 backdrop-blur-md text-amber-100 text-xs px-2.5 py-1 rounded-full border border-amber-700/30 font-medium">
-                    {dish.region}
-                  </span>
-                </div>
+            {filteredDishes.map((dish) => {
+              const isSaved = bookmarkedIds.includes(dish._id)
+              return (
+                <article
+                  key={dish._id}
+                  className="bg-white rounded-2xl overflow-hidden border border-amber-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group relative"
+                >
+                  {/* Hình ảnh & Nút Thả Tim */}
+                  <div className="relative h-48 w-full overflow-hidden bg-amber-100">
+                    {dish.image && (
+                      <Image
+                        src={urlFor(dish.image).url()}
+                        alt={dish.title || 'Món ăn'}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    )}
+                    <span className="absolute top-3 right-3 bg-amber-950/70 backdrop-blur-md text-amber-100 text-xs px-2.5 py-1 rounded-full border border-amber-700/30 font-medium z-10">
+                      {dish.region}
+                    </span>
 
-                {/* Nội dung card */}
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold text-amber-950 mb-2 group-hover:text-amber-700 transition-colors">
-                      {dish.title}
-                    </h3>
-                    <p className="text-amber-800/80 text-sm line-clamp-3 mb-4 leading-relaxed">
-                      {dish.description}
-                    </p>
-                  </div>
-
-                  {/* Hashtags & Nút xem thêm */}
-                  <div>
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {dish.tags?.map((tag, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                          className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-                            selectedTag?.toLowerCase() === tag.toLowerCase()
-                              ? 'bg-amber-600 text-white font-bold shadow-sm scale-105'
-                              : 'bg-amber-50 text-amber-700 hover:bg-amber-200 border border-amber-200/60'
-                          }`}
-                        >
-                          #{tag}
-                        </button>
-                      ))}
-                    </div>
-                    <Link
-                      href={`/recipe/${dish.slug || dish._id}`}
-                      className="text-xs font-bold text-amber-800 group-hover:text-amber-600 flex items-center gap-1 transition-colors font-[family-name:var(--font-mono)]"
+                    {/* Nút Bookmark Thả Tim ❤️ */}
+                    <button
+                      onClick={(e) => toggleBookmark(dish._id, e)}
+                      title={isSaved ? 'Bỏ lưu món ăn' : 'Lưu món ăn vào sổ tay'}
+                      className={`absolute top-3 left-3 z-10 w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
+                        isSaved
+                          ? 'bg-rose-500 text-white shadow-lg scale-110'
+                          : 'bg-white/80 hover:bg-white text-gray-400 hover:text-rose-500 shadow-sm'
+                      }`}
                     >
-                      Xem Thêm -&gt;
-                    </Link>
+                      <span className="text-base transition-transform active:scale-125">
+                        {isSaved ? '❤️' : '🤍'}
+                      </span>
+                    </button>
                   </div>
-                </div>
-              </article>
-            ))}
+
+                  {/* Nội dung card */}
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-amber-950 mb-2 group-hover:text-amber-700 transition-colors">
+                        {dish.title}
+                      </h3>
+                      <p className="text-amber-800/80 text-sm line-clamp-3 mb-4 leading-relaxed">
+                        {dish.description}
+                      </p>
+                    </div>
+
+                    {/* Hashtags & Nút xem thêm */}
+                    <div>
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {dish.tags?.map((tag, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                            className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
+                              selectedTag?.toLowerCase() === tag.toLowerCase()
+                                ? 'bg-amber-600 text-white font-bold shadow-sm scale-105'
+                                : 'bg-amber-50 text-amber-700 hover:bg-amber-200 border border-amber-200/60'
+                            }`}
+                          >
+                            #{tag}
+                          </button>
+                        ))}
+                      </div>
+                      <Link
+                        href={`/recipe/${dish.slug || dish._id}`}
+                        className="text-xs font-bold text-amber-800 group-hover:text-amber-600 flex items-center gap-1 transition-colors font-[family-name:var(--font-mono)]"
+                      >
+                        Xem Thêm -&gt;
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         ) : (
           /* Trạng thái không tìm thấy món */
           <div className="text-center py-12 px-4 bg-amber-50/50 rounded-2xl border border-dashed border-amber-200/80 my-6">
             <div className="relative inline-block mb-3">
-              <span className="text-5xl block animate-bounce">🥣</span>
-              <span className="absolute -top-1 -right-2 text-xl">❌</span>
+              <span className="text-5xl block animate-bounce">
+                {selectedRegion === 'saved' ? '💔' : '🥣'}
+              </span>
             </div>
             <h3 className="text-lg font-extrabold text-amber-950 mb-1">
-              Bếp hết món này rồi bạn ơi!
+              {selectedRegion === 'saved'
+                ? 'Bạn chưa lưu món ăn nào!'
+                : 'Bếp hết món này rồi bạn ơi!'}
             </h3>
             
             <p className="text-amber-800/80 text-sm max-w-sm mx-auto leading-relaxed italic mb-4">
-              "Đầu bếp tìm hoài trong bếp mà không thấy món nào phù hợp... Bạn thử bỏ lọc bớt tag hoặc đổi từ khóa nhé!"
+              {selectedRegion === 'saved'
+                ? 'Hãy bấm vào biểu tượng trái tim 🤍 ở góc từng món ăn để lưu lại món bạn yêu thích nhé!'
+                : '"Đầu bếp tìm hoài trong bếp mà không thấy món nào phù hợp... Bạn thử bỏ lọc bớt tag hoặc đổi từ khóa nhé!"'}
             </p>
 
             {selectedTag && (
