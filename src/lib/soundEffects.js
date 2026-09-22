@@ -1,17 +1,43 @@
-// Quản lý âm thanh dùng lại Audio Instance - Không bị ngắt luồng trình duyệt
-if (typeof window !== 'undefined') {
-  window._audioCache = window._audioCache || {}
-}
+// Quản lý âm thanh kết hợp Web Audio API (cho tiếng tick) & MP3 CDN (cho tiếng thắng)
+let audioCtx = null
 
 export const playSound = (type) => {
   if (typeof window === 'undefined') return
 
-  const soundUrls = {
-    // Tiếng tick đanh gọn
-    tick: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
-    spin: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
+  // 1. Tiếng LẠCH CẠCH CS2 (Dùng Web Audio API - Siêu nhẹ, không lo trình duyệt chặn)
+  if (type === 'tick' || type === 'spin') {
+    try {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext
+        audioCtx = new AudioContext()
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume()
+      }
 
-    // Âm thanh chúc mừng phân cấp
+      const osc = audioCtx.createOscillator()
+      const gain = audioCtx.createGain()
+
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(1200, audioCtx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.025)
+
+      gain.gain.setValueAtTime(0.18, audioCtx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.025)
+
+      osc.connect(gain)
+      gain.connect(audioCtx.destination)
+
+      osc.start()
+      osc.stop(audioCtx.currentTime + 0.025)
+    } catch (e) {
+      console.error(e)
+    }
+    return
+  }
+
+  // 2. Tiếng CHÚC MỪNG PHÂN CẤP (Dùng MP3)
+  const soundUrls = {
     win_sr: 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3',
     win_ssr: 'https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3',
     win_ur: 'https://assets.mixkit.co/active_storage/sfx/2020/2020-preview.mp3',
@@ -20,24 +46,11 @@ export const playSound = (type) => {
   const url = soundUrls[type] || soundUrls['win_sr']
 
   try {
-    // Xử lý riêng cho tiếng 'tick' / 'spin' cuộn liên tục để không tạo rác bộ nhớ
-    if (type === 'tick' || type === 'spin') {
-      if (!window._audioCache['tick']) {
-        window._audioCache['tick'] = new Audio(url)
-        window._audioCache['tick'].volume = 0.35
-      }
-      const tickAudio = window._audioCache['tick'].cloneNode()
-      tickAudio.volume = 0.35
-      tickAudio.play().catch(() => {})
-      return
-    }
-
-    // Với các âm thanh chúc mừng (win_sr, win_ssr, win_ur)
     const audio = new Audio(url)
     audio.volume = 0.8
     audio.currentTime = 0
-    audio.play().catch((e) => console.warn('Autoplay prevented:', e))
+    audio.play().catch((err) => console.warn('Lỗi tự động phát:', err))
   } catch (e) {
-    console.error('Audio Playback Error:', e)
+    console.error(e)
   }
 }

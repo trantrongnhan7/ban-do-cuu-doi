@@ -22,7 +22,7 @@ function getRarityInfo(tags = []) {
   const normalizedTags = tags.map(t => removeVietnameseTones(t))
 
   const isUR = normalizedTags.some(t =>
-    ['hiem', 'hiemco', 'khotim', 'docla', 'thuonghang', 'hiemco'].includes(t)
+    ['hiem', 'hiemco', 'khotim', 'docla', 'thuonghang'].includes(t)
   )
   const isSSR = normalizedTags.some(t =>
     ['haisan', 'lehoi', 'damdo', 'damtiec', 'xaxi'].includes(t)
@@ -123,6 +123,7 @@ export default function RandomDishModal({ dishes }) {
   
   const containerRef = useRef(null)
   const stripRef = useRef(null)
+  const tickTimerRef = useRef(null)
 
   const handleOpenAndSpin = () => {
     if (!dishes || dishes.length === 0) return
@@ -130,8 +131,17 @@ export default function RandomDishModal({ dishes }) {
     startCS2Spin()
   }
 
+  const handleCloseModal = () => {
+    if (tickTimerRef.current) clearTimeout(tickTimerRef.current)
+    setIsSpinning(false)
+    setIsOpen(false)
+  }
+
   const startCS2Spin = () => {
     if (isSpinning || !dishes || dishes.length === 0) return
+
+    // Xóa timer phát tiếng lạch cạch cũ nếu có
+    if (tickTimerRef.current) clearTimeout(tickTimerRef.current)
 
     setIsSpinning(true)
     setWinningDish(null)
@@ -172,17 +182,17 @@ export default function RandomDishModal({ dishes }) {
 
       const finalTargetX = exactCenterTargetX + edgeOffset
 
-      // 🔊 TẠO CHUỖI TIẾNG LẠCH CẠCH CHẬM DẦN CHUẨN CS2
-      let delay = 50
+      // 🔊 CHUỖI TIẾNG LẠCH CẠCH CHẬM DẦN CS2
+      let delay = 60
       let totalTime = 0
       const duration = 8500
 
       const playCs2Ticks = () => {
         if (totalTime < duration) {
           playSound('tick')
-          delay *= 1.065 // Càng về sau tiếng tạch càng thưa dần
+          delay *= 1.065
           totalTime += delay
-          setTimeout(playCs2Ticks, delay)
+          tickTimerRef.current = setTimeout(playCs2Ticks, delay)
         }
       }
       playCs2Ticks()
@@ -195,10 +205,9 @@ export default function RandomDishModal({ dishes }) {
         setIsSpinning(false)
         setWinningDish(winner)
 
-        // Lấy thông tin độ hiếm của món ăn trúng
         const rarity = getRarityInfo(winner.tags)
 
-        // 🔊 PHÁT ÂM THANH CHÚC MỪNG TƯƠNG ỨNG TIER
+        // 🔊 PHÁT ÂM THANH CHÚC MỪNG PHÂN CẤP TƯƠNG ỨNG TIER
         if (rarity.tier === 'UR') {
           playSound('win_ur')
         } else if (rarity.tier === 'SSR') {
@@ -207,7 +216,6 @@ export default function RandomDishModal({ dishes }) {
           playSound('win_sr')
         }
 
-        // Kích hoạt pháo hoa
         triggerConfetti(rarity.tier)
       }, 8500)
     }, 100)
@@ -232,7 +240,7 @@ export default function RandomDishModal({ dishes }) {
           }`}>
             
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={handleCloseModal}
               className="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center z-20"
             >
               ✕
@@ -315,7 +323,7 @@ export default function RandomDishModal({ dishes }) {
               <button
                 onClick={startCS2Spin}
                 disabled={isSpinning}
-                className="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 font-bold py-3 px-4 rounded-xl text-sm transition-all"
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 font-bold py-3 px-4 rounded-xl text-sm transition-all disabled:opacity-50"
               >
                 {isSpinning ? 'Đang mở hòm...' : 'Mở lại 🎟️'}
               </button>
@@ -323,7 +331,7 @@ export default function RandomDishModal({ dishes }) {
               {winningDish && !isSpinning && (
                 <Link
                   href={`/recipe/${typeof winningDish.slug === 'string' ? winningDish.slug : winningDish.slug?.current || winningDish._id}`}
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleCloseModal}
                   className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold py-3 px-4 rounded-xl text-sm transition-all shadow-lg flex items-center justify-center gap-1 active:scale-95"
                 >
                   Xem công thức ngay ➔
