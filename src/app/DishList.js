@@ -249,7 +249,7 @@ export function DishList({ dishes }) {
                     <button
                       onClick={(e) => handleShareDish(dish, e)}
                       title="Chia sẻ món ăn này"
-                      className="absolute top-3 left-14 z-10 w-9 h-9 rounded-full flex items-center justify-center bg-white/80 hover:bg-white text-gray-600 hover:text-amber-600 backdrop-blur-md shadow-sm transition-all active:scale-125"
+                      className="absolute bottom-3 right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center bg-white/80 hover:bg-white text-gray-600 hover:text-amber-600 backdrop-blur-md shadow-sm transition-all active:scale-125"
                     >
                       <span className="text-sm">
                         {copiedDishId === dish._id ? '✅' : '🔗'}
@@ -258,7 +258,7 @@ export function DishList({ dishes }) {
 
                     {/* Notification Popup nhỏ khi Copy thành công */}
                     {copiedDishId === dish._id && (
-                      <span className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-amber-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg backdrop-blur-sm animate-fade-in">
+                      <span className="absolute bottom-14 right-3 z-20 bg-amber-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg backdrop-blur-sm animate-fade-in">
                         Đã chép link! 📋
                       </span>
                     )}
