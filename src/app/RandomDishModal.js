@@ -242,13 +242,40 @@ export default function RandomDishModal({ dishes }) {
 
   return (
     <>
-      <button
-        onClick={handleOpenAndSpin}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-gradient-to-r from-red-600 via-amber-500 to-orange-500 hover:scale-105 text-white font-extrabold py-2.5 px-4 sm:py-3.5 sm:px-6 rounded-full shadow-2xl border-2 border-amber-300 flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 animate-bounce text-xs sm:text-base"
-      >
-        <span className="text-2xl">🎲</span>
-        <span className="tracking-wide">Food Gacha🎰 </span>
-      </button>
+      <div className="fixed bottom-5 right-5 z-40 flex flex-col items-center">
+        
+        {/* Tag thông báo nhỏ nhấp nháy phía trên nút */}
+        <span className="mb-1 text-[10px] font-black uppercase tracking-wider text-amber-300 bg-red-600 px-2 py-0.5 rounded-full border border-amber-300 shadow-md animate-pulse">
+          ✨ Hòm Cứu Đói ✨
+        </span>
+
+        {/* Nút bấm hình tròn hòm báu nhấp nháy nhịp đập & phát sáng */}
+        <button
+          onClick={handleOpenAndSpin}
+          aria-label="Open Food Gacha Modal"
+          className="group relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-amber-600 via-red-600 to-amber-400 p-[3px] shadow-[0_0_25px_rgba(245,158,11,0.8)] hover:shadow-[0_0_40px_rgba(245,158,11,1)] transition-all duration-300 hover:scale-110 active:scale-95 animate-pulse"
+        >
+          {/* Lớp viền xoay hào quang phía sau */}
+          <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-amber-400 via-pink-500 to-red-500 opacity-75 blur-sm group-hover:opacity-100 transition duration-500 group-hover:duration-200 animate-spin" style={{ animationDuration: '6s' }}></div>
+
+          {/* Mặt trong của Nút */}
+          <div className="relative w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border border-amber-300/60 overflow-hidden">
+            
+            {/* Biểu tượng Hòm / Nồi cơm nhún nhảy */}
+            <span className="text-2xl sm:text-3xl transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12 animate-bounce">
+              🧰
+            </span>
+
+            {/* Chữ Gacha đốm sáng */}
+            <span className="text-[10px] sm:text-[11px] font-black tracking-wider text-amber-300 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mt-0.5">
+              GACHA
+            </span>
+
+            {/* Dải sáng lướt qua mặt nút */}
+            <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 group-hover:animate-shine" />
+          </div>
+        </button>
+      </div>
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg">
