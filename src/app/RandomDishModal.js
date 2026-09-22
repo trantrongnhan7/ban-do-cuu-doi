@@ -184,11 +184,20 @@ export default function RandomDishModal({ dishes }) {
         setIsSpinning(false)
         setWinningDish(winner)
 
-        // Kiểm tra độ hiếm để kích hoạt Nổ Pháo Hoa
+        // Lấy thông tin độ hiếm của món ăn trúng
         const rarity = getRarityInfo(winner.tags)
-        if (rarity.tier === 'UR' || rarity.tier === 'SSR') {
-          triggerConfetti(rarity.tier)
+
+        // 🔊 PHÁT ÂM THANH PHÂN CẤP THEO ĐỘ HIẾM (R, SR, SSR, UR)
+        if (rarity.tier === 'UR') {
+          playSound('win_ur')
+        } else if (rarity.tier === 'SSR') {
+          playSound('win_ssr')
+        } else {
+          playSound('win_sr')
         }
+
+        // Kích hoạt pháo hoa tương ứng
+        triggerConfetti(rarity.tier)
       }, 8500)
     }, 100)
   }
