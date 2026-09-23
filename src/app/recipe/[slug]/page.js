@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation'
 export async function generateMetadata({ params }) {
   const { slug } = await params
   const dish = await client.fetch(
-    `*[_type == "recipe" && slug.current == $slug][0]{ title, description, image }`,
+    `*[_type == "recipe" && slug.current == $slug][0]{ title, description, story, image }`,
     { slug }
   )
 
@@ -17,10 +17,10 @@ export async function generateMetadata({ params }) {
 
   return {
     title: `${dish.title} | Bản Đồ Cứu Đói`,
-    description: dish.description || 'Khám phá công thức và nguyên liệu món ăn đặc sản Việt Nam.',
+    description: dish.story || dish.description || 'Khám phá công thức và nguyên liệu món ăn đặc sản Việt Nam.',
     openGraph: {
       title: dish.title,
-      description: dish.description,
+      description: dish.story || dish.description,
       images: [imageUrl],
     },
   }
@@ -30,14 +30,16 @@ export async function generateMetadata({ params }) {
 export default async function RecipeDetail({ params }) {
   const { slug } = await params
 
-  // BƯỚC A: Tìm món ăn hiện tại
+  // BƯỚC A: Tìm món ăn hiện tại (Bổ sung fetch story và hashtags)
   const dish = await client.fetch(
     `*[_type == "recipe" && slug.current == $slug][0] {
       _id,
       title,
       region,
       image,
+      story,
       description,
+      hashtags,
       tags,
       ingredients
     }`,
@@ -60,6 +62,18 @@ export default async function RecipeDetail({ params }) {
     }`,
     { region: dish.region, id: dish._id }
   )
+
+  // Format tên Vùng Miền tiếng Việt
+  const formatRegion = (reg) => {
+    if (reg === 'ca-3-mien' || reg === 'Cả 3 Miền') return 'Cả 3 Miền'
+    if (reg === 'mien-bac' || reg === 'Miền Bắc') return 'Miền Bắc'
+    if (reg === 'mien-trung' || reg === 'Miền Trung') return 'Miền Trung'
+    if (reg === 'mien-nam' || reg === 'Miền Nam') return 'Miền Nam'
+    return reg || 'Cả 3 Miền'
+  }
+
+  const regionDisplayName = formatRegion(dish.region).toUpperCase()
+  const displayTags = (dish.hashtags && dish.hashtags.length > 0 ? dish.hashtags : dish.tags) || []
 
   return (
     <main className="min-h-screen bg-amber-50/40 py-10 px-4 sm:px-6 lg:px-8">
@@ -84,38 +98,37 @@ export default async function RecipeDetail({ params }) {
               className="object-cover"
               priority
             />
-            <span className="absolute top-2 right-2 bg-amber-950/70 backdrop-blur-md text-amber-100 text-[10px] px-2.5 py-0.5 rounded-full border border-amber-700/30 font-medium">
-                {item.region === 'ca-3-mien' || item.region === 'Cả 3 Miền'
-                   ? 'Cả 3 Miền'
-                      : item.region === 'mien-bac' || item.region === 'Miền Bắc'
-                    ? 'Miền Bắc'
-                     : item.region === 'mien-trung' || item.region === 'Miền Trung'
-                    ? 'Miền Trung'
-                    : item.region === 'mien-nam' || item.region === 'Miền Nam'
-                    ? 'Miền Nam'
-                    : item.region || 'Cả 3 Miền'}
-             </span>
+            {/* Sửa biến item.region -> dish.region */}
+            <span className="absolute top-3 right-3 bg-amber-950/70 backdrop-blur-md text-amber-100 text-xs px-2.5 py-1 rounded-full border border-amber-700/30 font-medium z-10">
+              {formatRegion(dish.region)}
+            </span>
           </div>
 
           {/* Nội dung chi tiết */}
-          <div className="flex flex-wrap gap-2 mt-4">
-           {dish.hashtags?.map((tag, idx) => (
-            <span
-              key={idx}
-              className="bg-amber-100/80 text-amber-900 text-xs font-semibold px-3 py-1 rounded-full border border-amber-200"
-            >
-            #{tag}
-            </span>
-          ))}
-            </div>
+          <div className="p-6 sm:p-8">
+            <h1 className="text-3xl font-black text-amber-950 mb-4">{dish.title}</h1>
+
+            {/* Thẻ Hashtag */}
+            {displayTags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {displayTags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="bg-amber-100/80 text-amber-900 text-xs font-semibold px-3 py-1 rounded-full border border-amber-200"
+                  >
+                    #{tag.replace(/^#/, '')}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Câu chuyện món ăn */}
             <section className="mb-8">
               <h2 className="font-[family-name:var(--font-mono)] text-lg font-bold text-amber-900 border-b border-amber-200 pb-2 mb-3">
                 &gt; Câu chuyện món ăn_
               </h2>
-              <p className="text-slate-700 leading-relaxed text-base">
-                {dish.description}
+              <p className="text-slate-700 leading-relaxed text-base whitespace-pre-line">
+                {dish.story || dish.description || 'Món ăn truyền thống đậm đà bản sắc Việt.'}
               </p>
             </section>
 
@@ -146,27 +159,15 @@ export default async function RecipeDetail({ params }) {
           </div>
         </article>
 
-        {/* Khối hiển thị Món ăn cùng vùng miền (Layout dọc cân đối & Đẹp mắt) */}
+        {/* Khối hiển thị Món ăn cùng vùng miền */}
         {relatedDishes && relatedDishes.length > 0 && (
           <section className="mt-12 pt-8 border-t border-amber-200/80">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-2xl shadow-lg border border-amber-300/40">
                 <span className="text-xl">🍲</span>
-                {/* Hàm định dạng hiển thị tên Vùng Miền */}
-{(() => {
-  const regionName = 
-    dish.region === 'ca-3-mien' || dish.region === 'Cả 3 Miền' ? 'CẢ 3 MIỀN' :
-    dish.region === 'mien-bac' || dish.region === 'Miền Bắc' ? 'MIỀN BẮC' :
-    dish.region === 'mien-trung' || dish.region === 'Miền Trung' ? 'MIỀN TRUNG' :
-    dish.region === 'mien-nam' || dish.region === 'Miền Nam' ? 'MIỀN NAM' :
-    (dish.region || 'CẢ 3 MIỀN').toUpperCase();
-
-  return (
-    <h3 className="text-lg font-bold text-amber-950 uppercase">
-      🍢 MÓN NGON KHÁC Ở {regionName}
-    </h3>
-  );
-})()}
+                <h3 className="text-lg font-bold text-white uppercase tracking-wide">
+                  MÓN NGON KHÁC Ở {regionDisplayName}
+                </h3>
               </div>
 
               <span className="text-xs font-bold text-amber-900 bg-amber-100 px-3.5 py-1.5 rounded-full border border-amber-300 shadow-sm">
@@ -181,7 +182,6 @@ export default async function RecipeDetail({ params }) {
                   href={`/recipe/${item.slug}`}
                   className="group bg-white rounded-2xl border border-amber-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
                 >
-                  {/* Khung ảnh vuông vắn tỉ lệ 16:9 */}
                   <div className="relative h-36 w-full overflow-hidden bg-amber-100">
                     {item.image && (
                       <Image
@@ -191,12 +191,12 @@ export default async function RecipeDetail({ params }) {
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     )}
+                    {/* Map nhãn Vùng Miền gợi ý sang tiếng Việt */}
                     <span className="absolute top-2.5 right-2.5 bg-amber-950/75 text-amber-50 text-[10px] font-medium px-2 py-0.5 rounded-full backdrop-blur-xs">
-                      {item.region}
+                      {formatRegion(item.region)}
                     </span>
                   </div>
 
-                  {/* Phần chữ tiêu đề xếp dọc gọn gàng */}
                   <div className="p-4 flex-1 flex flex-col justify-between bg-white">
                     <h4 className="font-bold text-amber-950 text-base group-hover:text-amber-700 transition-colors line-clamp-1 mb-1">
                       {item.title}
