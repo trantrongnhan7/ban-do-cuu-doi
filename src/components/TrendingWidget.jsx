@@ -197,7 +197,7 @@ export default function TrendingWidget({ dishes = [] }) {
               <span className="text-2xl shrink-0 animate-bounce">🎰</span>
               <div className="min-w-0 flex-1">
                 <h3 className="text-xs font-black text-amber-950 uppercase tracking-wide truncate">
-                  Top Gacha Hot
+                  Top Món ăn Hot
                 </h3>
                 <p className="text-[10px] text-amber-800 font-medium truncate">
                   Quay trúng nhiều nhất hôm nay
