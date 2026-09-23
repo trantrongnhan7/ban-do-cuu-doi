@@ -229,8 +229,8 @@ export default function RandomDishModal({ dishes }) {
 
             <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-amber-400 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.9)] transition-all duration-500 group-hover:shadow-[0_0_35px_rgba(239,68,68,1)] flex items-center justify-center overflow-hidden">
               <div 
-                className="absolute inset-0.5 rounded-full bg-[conic-gradient(from_0deg,#dc2626_0deg_30deg,#ffffff_30deg_60deg,#dc2626_60deg_90deg,#ffffff_90deg_120deg,#dc2626_120deg_150deg,#ffffff_150deg_180deg,#dc2626_180deg_210deg,#dc2626_240deg_270deg,#ffffff_270deg_300deg,#dc2626_300deg_330deg,#ffffff_330deg_360deg)] opacity-90 animate-spin"
-                style={{ animationDuration: '10s' }}
+                className="absolute inset-0.5 rounded-full bg-[conic-gradient(from_0deg,#dc2626_0deg_30deg,#ffffff_30deg_60deg,#dc2626_60deg_90deg,#ffffff_90deg_120deg,#dc2626_120deg_150deg,#ffffff_150deg_180deg,#dc2626_180deg_210deg,#ffffff_210deg_240deg,#dc2626_240deg_270deg,#ffffff_270deg_300deg,#dc2626_300deg_330deg,#ffffff_330deg_360deg)] opacity-90 animate-spin"
+                 style={{ animationDuration: '10s' }}
               ></div>
               <div className="absolute inset-0 rounded-full border-2 border-dashed border-yellow-200/80 animate-pulse"></div>
               <div className="absolute w-8 h-8 rounded-full border-2 border-amber-300 bg-amber-600/40 backdrop-blur-[1px]"></div>
