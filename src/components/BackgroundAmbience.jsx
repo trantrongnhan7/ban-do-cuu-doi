@@ -18,10 +18,10 @@ export default function BackgroundAmbience() {
 
     if (isDetailPage) {
       // Giảm âm lượng khi xem chi tiết công thức
-      audioRef.current.volume = 0.1
+      audioRef.current.volume = 0.2
     } else {
       // Âm lượng phố phường vừa phải ở trang chủ
-      audioRef.current.volume = 0.35
+      audioRef.current.volume = 0.45
     }
   }, [pathname])
 
@@ -66,7 +66,7 @@ export default function BackgroundAmbience() {
       {/* Thẻ Audio chạy ẩn ở nền */}
       <audio
         ref={audioRef}
-        src="/sounds/street_ambience.mp3"
+        src="/sounds/street_ambience 1.mp3"
         loop
         preload="auto"
       />
