@@ -16,7 +16,7 @@ export default async function Home() {
     mealTime,
     occasion,
     story,
-    "hashtags": hashtags[]->name,
+    "hashtags": coalesce(hashtags[]->name, hashtags, tags, []),
     "ingredients": mainIngredients[]->name,
     "cookingMethods": cookingMethods[]->name
   }`)

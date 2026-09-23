@@ -39,8 +39,8 @@ export default async function RecipeDetail({ params }) {
       image,
       story,
       description,
-      hashtags,
-      tags,
+      "hashtags": coalesce(hashtags[]->name, hashtags, tags, []),
+      "tags": coalesce(tags[]->name, tags, []),
       ingredients
     }`,
     { slug }
@@ -109,18 +109,18 @@ export default async function RecipeDetail({ params }) {
             <h1 className="text-3xl font-black text-amber-950 mb-4">{dish.title}</h1>
 
             {/* Thẻ Hashtag */}
-            {displayTags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {displayTags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="bg-amber-100/80 text-amber-900 text-xs font-semibold px-3 py-1 rounded-full border border-amber-200"
-                  >
-                    #{tag.replace(/^#/, '')}
-                  </span>
-                ))}
-              </div>
-            )}
+            {dish.hashtags && dish.hashtags.length > 0 && (
+             <div className="flex flex-wrap gap-2 mb-6">
+               {dish.hashtags.map((tag, idx) => (
+            <span
+             key={idx}
+              className="bg-amber-100/80 text-amber-900 text-xs font-semibold px-3 py-1 rounded-full border border-amber-200"
+        >
+               #{typeof tag === 'string' ? tag.replace(/^#/, '') : tag}
+            </span>
+              ))}
+            </div>
+        )}
 
             {/* Câu chuyện món ăn */}
             <section className="mb-8">
@@ -128,7 +128,7 @@ export default async function RecipeDetail({ params }) {
                 &gt; Câu chuyện món ăn_
               </h2>
               <p className="text-slate-700 leading-relaxed text-base whitespace-pre-line">
-                {dish.story || dish.description || 'Món ăn truyền thống đậm đà bản sắc Việt.'}
+                {dish.story || dish.description || 'Chưa cập nhật câu chuyện cho món ăn này.'}
               </p>
             </section>
 
