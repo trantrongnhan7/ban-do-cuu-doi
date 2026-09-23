@@ -150,9 +150,7 @@ export function DishList({ dishes }) {
               &gt; Bản đồ vị giác 3 miền: Lưu giữ hương vị xưa bằng góc nhìn mới_
             </p>
           </div>
-          {/* 🟢 CHÈN DÃY TOP 1-4 VÀO ĐÂY */}
-          <TrendingBar dishes={dishes} />
-
+          
           {/* Logo Huy Hiệu bo tròn đặt bên phải gọn gàng, không che chữ */}
           <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full overflow-hidden border-2 border-amber-300 shadow-sm bg-white p-1 hidden sm:block">
             <img
@@ -163,6 +161,9 @@ export function DishList({ dishes }) {
           </div>
         </div>
       </header>
+
+        {/* 🟢 DÃY TOP 1-4 NẰM ĐÚNG VỊ TRÍ NÀY (BÊN NGOÀI HEADER, TRÊN THANH TÌM KIẾM) */}
+      <TrendingBar dishes={dishes} />
 
       {/* Thanh Tìm kiếm & Bộ lọc Vùng miền + Bookmark */}
       <section className="max-w-4xl mx-auto mb-8 space-y-4">
