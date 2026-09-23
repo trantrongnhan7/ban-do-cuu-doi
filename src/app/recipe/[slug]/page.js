@@ -154,7 +154,7 @@ export default async function RecipeDetail({ params }) {
                 <p className="text-xs text-amber-700/70 italic">
                   Chưa cập nhật thông tin nguyên liệu cho món ăn này.
                 </p>
-              )}
+              )}            
             </section>
           </div>
         </article>
