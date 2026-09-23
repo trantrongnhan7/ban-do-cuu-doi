@@ -6,29 +6,75 @@ import { usePathname } from 'next/navigation'
 export default function BackgroundAmbience() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
+  
   const audioRef = useRef(null)
+  const audioCtxRef = useRef(null)
+  const filterNodeRef = useRef(null)
+  const gainNodeRef = useRef(null)
+  const sourceNodeRef = useRef(null)
+
   const pathname = usePathname()
 
-  // 1. Tự động điều chỉnh âm lượng theo từng trang
-  useEffect(() => {
-    if (!audioRef.current) return
+  // 1. Khởi tạo Web Audio API & Low-pass Filter
+  const initAudioContext = () => {
+    if (audioCtxRef.current || !audioRef.current) return
 
-    // Kiểm tra xem có đang ở trang chi tiết món ăn không
+    const AudioContext = window.AudioContext || window.webkitAudioContext
+    const ctx = new AudioContext()
+    audioCtxRef.current = ctx
+
+    // Tạo các node âm thanh
+    const source = ctx.createMediaElementSource(audioRef.current)
+    const filter = ctx.createBiquadFilter()
+    const gain = ctx.createGain()
+
+    // Cấu hình bộ lọc Low-pass (Lọc tần số cao để tạo tiếng đục/bí)
+    filter.type = 'lowpass'
+    filter.frequency.value = 20000 // Ban đầu mở hoàn toàn (Âm thanh trong trẻo ngoài đường)
+
+    // Kết nối chuỗi âm thanh: Audio -> Filter -> Gain -> Loa
+    source.connect(filter)
+    filter.connect(gain)
+    gain.connect(ctx.destination)
+
+    sourceNodeRef.current = source
+    filterNodeRef.current = filter
+    gainNodeRef.current = gain
+  }
+
+  // 2. Xử lý chuyển đổi âm thanh khi đổi Trang (Trang chủ <-> Trang chi tiết)
+  useEffect(() => {
+    if (!audioCtxRef.current || !filterNodeRef.current || !gainNodeRef.current) return
+
     const isDetailPage = pathname.startsWith('/recipe/')
+    const ctx = audioCtxRef.current
+    const currTime = ctx.currentTime
 
     if (isDetailPage) {
-      // Giảm âm lượng khi xem chi tiết công thức
-      audioRef.current.volume = 0.2
+      // 🚪 KHI VÀO TRANG XEM CÔNG THỨC (Đóng cửa phòng):
+      // 1. Hạ tần số cắt xuống 400Hz -> Lọc sạch âm cao, tiếng đục và bí lại như qua bức tường
+      filterNodeRef.current.frequency.exponentialRampToValueAtTime(400, currTime + 1.2)
+      // 2. Giảm nhẹ âm lượng tổng
+      gainNodeRef.current.gain.linearRampToValueAtTime(0.2, currTime + 1.2)
     } else {
-      // Âm lượng phố phường vừa phải ở trang chủ
-      audioRef.current.volume = 0.45
+      // 🏙️ KHI TRỞ VỀ TRANG CHỦ (Mở cửa ra đường):
+      // 1. Trả lại tần số 20000Hz -> Âm thanh trong trẻo, rõ ràng trở lại
+      filterNodeRef.current.frequency.exponentialRampToValueAtTime(20000, currTime + 1.2)
+      // 2. Tăng lại âm lượng phố phường vừa phải
+      gainNodeRef.current.gain.linearRampToValueAtTime(0.35, currTime + 1.2)
     }
   }, [pathname])
 
-  // 2. Kích hoạt âm thanh khi người dùng tương tác lần đầu với website
+  // 3. Tự động kích hoạt khi có tương tác đầu tiên
   useEffect(() => {
     const handleFirstInteraction = () => {
       if (!hasInteracted && audioRef.current) {
+        initAudioContext()
+
+        if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+          audioCtxRef.current.resume()
+        }
+
         audioRef.current
           .play()
           .then(() => {
@@ -43,9 +89,15 @@ export default function BackgroundAmbience() {
     return () => window.removeEventListener('click', handleFirstInteraction)
   }, [hasInteracted])
 
-  // 3. Hàm bật / tắt âm thanh khi click nút
+  // 4. Bật / Tắt âm thanh
   const toggleSound = () => {
     if (!audioRef.current) return
+
+    initAudioContext()
+
+    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume()
+    }
 
     if (isPlaying) {
       audioRef.current.pause()
@@ -63,7 +115,6 @@ export default function BackgroundAmbience() {
 
   return (
     <>
-      {/* Thẻ Audio chạy ẩn ở nền */}
       <audio
         ref={audioRef}
         src="/sounds/street_ambience 2.mp3"
@@ -71,7 +122,7 @@ export default function BackgroundAmbience() {
         preload="auto"
       />
 
-      {/* 📻 Nút Bật/Tắt Âm Thanh Đường Phố ở vị trí khoanh đỏ (Top Right) */}
+      {/* Nút Bật/Tắt Âm Thanh Góc Trên Bên Phải */}
       <button
         onClick={toggleSound}
         title={isPlaying ? 'Tắt âm thanh phố phường' : 'Bật âm thanh phố phường'}
@@ -84,7 +135,6 @@ export default function BackgroundAmbience() {
           {isPlaying ? 'Quán Nhậu Đường Phố' : 'Mở Âm Thanh'}
         </span>
 
-        {/* Hiệu ứng sóng âm khi đang bật */}
         {isPlaying && (
           <span className="flex items-center gap-0.5 h-3 ml-0.5">
             <span className="w-0.5 h-full bg-amber-600 rounded-full animate-bounce"></span>
