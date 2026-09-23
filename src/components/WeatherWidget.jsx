@@ -12,6 +12,17 @@ export default function WeatherWidget({ onSelectCategory }) {
     suggestion: 'Đang tìm gợi ý vị giác phù hợp nhất...',
     bgGradient: 'from-amber-50 to-orange-50',
   })
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 120) {
+        setIsScrolled(true)
+      } else {
+        setIsScrolled(false)
+      }
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   useEffect(() => {
     // 1. Phân loại 7 khung giờ trong ngày
@@ -205,68 +216,89 @@ export default function WeatherWidget({ onSelectCategory }) {
 
   return (
     <aside
-      className={`fixed top-24 left-6 z-30 hidden xl:flex flex-col gap-3 w-64 bg-gradient-to-br ${weather.bgGradient} backdrop-blur-md p-4 rounded-3xl border border-amber-200/80 shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5`}
+      className={`fixed top-24 left-3 z-30 hidden xl:flex flex-col bg-gradient-to-br ${
+        weather.bgGradient
+      } backdrop-blur-md border border-amber-200/80 shadow-lg transition-all duration-300 group cursor-pointer ${
+        isScrolled
+          ? 'w-12 h-12 p-0 rounded-full items-center justify-center hover:w-60 hover:h-auto hover:p-4 hover:rounded-3xl hover:items-stretch'
+          : 'w-60 p-4 rounded-3xl items-stretch'
+      }`}
     >
-      {/* Header Widget */}
-      <div className="flex items-center justify-between border-b border-amber-200/60 pb-2.5">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl animate-bounce" style={{ animationDuration: '3s' }}>
-            {weather.icon}
-          </span>
-          <div>
-            <div className="text-xs font-bold text-amber-950 flex items-center gap-1">
-              📍 {weather.city}
-            </div>
-            <div className="text-[11px] text-amber-900/80 font-semibold">
-              {weather.timePeriodLabel} • {weather.condition} • {weather.temp}°C
+      {/* Khi đã cuộn xuống: Hiện Nút Tròn Nhỏ gọn chứa Icon */}
+      {isScrolled && (
+        <div
+          className="flex items-center justify-center w-full h-full group-hover:hidden"
+          title="Bấm để xem thời tiết & gợi ý món"
+        >
+          <span className="text-xl animate-pulse">{weather.icon}</span>
+        </div>
+      )}
+
+      {/* Nội dung đầy đủ (Tự động xòe ra khi hover vào nút tròn hoặc khi ở đầu trang) */}
+      <div
+        className={
+          isScrolled
+            ? 'hidden group-hover:flex flex-col gap-3'
+            : 'flex flex-col gap-3'
+        }
+      >
+        <div className="flex items-center justify-between border-b border-amber-200/60 pb-2.5">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl animate-bounce" style={{ animationDuration: '3s' }}>
+              {weather.icon}
+            </span>
+            <div>
+              <div className="text-xs font-bold text-amber-950 flex items-center gap-1">
+                📍 {weather.city}
+              </div>
+              <div className="text-[11px] text-amber-900/80 font-semibold">
+                {weather.timePeriodLabel} • {weather.temp}°C
+              </div>
             </div>
           </div>
+          <span className="text-[10px] bg-white/80 text-amber-900 font-bold px-2 py-0.5 rounded-full border border-amber-300/80 shadow-xs">
+            Gợi Ý
+          </span>
         </div>
-        <span className="text-[10px] bg-white/80 text-amber-900 font-bold px-2 py-0.5 rounded-full border border-amber-300/80 shadow-xs">
-          Gợi Ý Vị Giác
-        </span>
+
+        <p className="text-xs text-slate-800 leading-relaxed font-medium italic">
+          "{weather.suggestion}"
+        </p>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            if (!onSelectCategory) return
+
+            const currentHour = new Date().getHours()
+            const isRainingOrCold =
+              weather.condition.includes('Mưa') ||
+              weather.condition.includes('bão') ||
+              weather.temp <= 22
+
+            if (isRainingOrCold) {
+              onSelectCategory('troilanh')
+              return
+            }
+
+            if (currentHour >= 5 && currentHour < 11) {
+              onSelectCategory('sang')
+            } else if (currentHour >= 11 && currentHour < 14) {
+              onSelectCategory('trua')
+            } else if (currentHour >= 14 && currentHour < 18) {
+              onSelectCategory('anchoi')
+            } else if (currentHour >= 18 && currentHour < 22) {
+              onSelectCategory('toi')
+            } else {
+              onSelectCategory('ankhuya')
+            }
+          }}
+          className="w-full mt-1 py-2 px-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+        >
+          <span>🍲</span>
+          <span>Lọc món hợp thời tiết</span>
+        </button>
       </div>
-
-      {/* Nội dung gợi ý câu thoại */}
-      <p className="text-xs text-slate-800 leading-relaxed font-medium italic">
-        "{weather.suggestion}"
-      </p>
-
-      {/* Nút bấm lọc món */}
-      <button
-        onClick={() => {
-          if (!onSelectCategory) return
-
-          const currentHour = new Date().getHours()
-          const isRainingOrCold =
-            weather.condition.includes('Mưa') ||
-            weather.condition.includes('bão') ||
-            weather.temp <= 22
-
-          // 1. Nếu trời Mưa hoặc Lạnh -> Trút Lạnh / Ngày Mưa ('troilanh')
-          if (isRainingOrCold) {
-            onSelectCategory('troilanh')
-            return
-          }
-
-          // 2. Phụ thuộc vào Khung Giờ trong ngày (Sáng, Trưa, Xế chiều, Tối, Khuya)
-          if (currentHour >= 5 && currentHour < 11) {
-            onSelectCategory('sang')
-          } else if (currentHour >= 11 && currentHour < 14) {
-            onSelectCategory('trua')
-          } else if (currentHour >= 14 && currentHour < 18) {
-            onSelectCategory('anchoi')
-          } else if (currentHour >= 18 && currentHour < 22) {
-            onSelectCategory('toi')
-          } else {
-            onSelectCategory('ankhuya')
-          }
-        }}
-        className="w-full mt-1 py-2 px-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
-      >
-        <span>🍲</span>
-        <span>Lọc món hợp thời tiết</span>
-      </button>
     </aside>
   )
 }
