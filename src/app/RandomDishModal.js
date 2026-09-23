@@ -193,6 +193,22 @@ export default function RandomDishModal({ dishes }) {
       setTimeout(() => {
         setIsSpinning(false)
         setWinningDish(winner)
+        // 🟢 1. THÊM ĐOẠN NÀY ĐỂ GHI NHẬN LƯỢT QUAY CHO TRENDING WIDGET
+        if (winner?._id) {
+          try {
+            const today = new Date().toISOString().split('T')[0]
+            const storageKey = `gacha_stats_${today}`
+            const currentStats = JSON.parse(localStorage.getItem(storageKey) || '{}')
+
+            currentStats[winner._id] = (currentStats[winner._id] || 0) + 1
+            localStorage.setItem(storageKey, JSON.stringify(currentStats))
+
+            // Phát sự kiện để TrendingWidget cập nhật xếp hạng ngay lập tức
+            window.dispatchEvent(new Event('gacha_updated'))
+          } catch (e) {
+            console.error('Lỗi khi ghi nhận dữ liệu gacha:', e)
+          }
+        }
 
         // Lấy thông tin Rarity đồng bộ 100% từ món ăn chiến thắng
         const rarity = getRarityInfo(winner)
