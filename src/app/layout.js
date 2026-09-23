@@ -1,6 +1,6 @@
 import { Be_Vietnam_Pro, Comfortaa, Space_Mono } from 'next/font/google'
 import './globals.css'
-
+import BackgroundAmbience from '../components/BackgroundAmbience'
 // 1. Font Comfortaa cho tiêu đề bo tròn
 const comfortaa = Comfortaa({
   subsets: ['vietnamese', 'latin'],
@@ -31,6 +31,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="vi">
       <body className={`${beVietnamPro.className} ${comfortaa.variable} ${spaceMono.variable}`}>
+        <BackgroundAmbience />
         {children}
       </body>
     </html>
