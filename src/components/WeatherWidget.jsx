@@ -1,11 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export default function WeatherWidget({ onSelectCategory }) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [isMobileHidden, setIsMobileHidden] = useState(false) // State ẩn tạm thời icon trên mobile
   const [mounted, setMounted] = useState(false)
+
+  // Vị trí kéo thả cho nút Mobile
+  const [position, setPosition] = useState({ x: 16, y: 24 }) // Tương đương bottom-6 left-4
+  const isDragging = useRef(false)
+  const dragStart = useRef({ x: 0, y: 0 })
+  const initialPos = useRef({ x: 16, y: 24 })
+
   const [weather, setWeather] = useState({
     city: 'Đang xác định...',
     temp: '--',
@@ -16,16 +24,16 @@ export default function WeatherWidget({ onSelectCategory }) {
     bgGradient: 'from-amber-50 to-orange-50',
   })
 
+  // 1. Khởi tạo vị trí ban đầu trên mobile khi mount
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== 'undefined') {
+      setPosition({ x: 16, y: 24 }) // x: cách lề trái, y: cách lề dưới
+    }
 
     const handleScroll = () => {
       if (typeof window !== 'undefined') {
-        if (window.scrollY > 120) {
-          setIsScrolled(true)
-        } else {
-          setIsScrolled(false)
-        }
+        setIsScrolled(window.scrollY > 120)
       }
     }
 
@@ -40,6 +48,35 @@ export default function WeatherWidget({ onSelectCategory }) {
     }
   }, [])
 
+  // 2. Logic xử lý Kéo - Thả (Touch Dragging) trên Mobile
+  const handleTouchStart = (e) => {
+    isDragging.current = false
+    const touch = e.touches[0]
+    dragStart.current = { x: touch.clientX, y: touch.clientY }
+    initialPos.current = { ...position }
+  }
+
+  const handleTouchMove = (e) => {
+    const touch = e.touches[0]
+    const deltaX = touch.clientX - dragStart.current.x
+    const deltaY = dragStart.current.y - touch.clientY // Đảo ngược do tính theo bottom
+
+    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+      isDragging.current = true
+    }
+
+    if (isDragging.current) {
+      const newX = Math.max(10, Math.min(window.innerWidth - 60, initialPos.current.x + deltaX))
+      const newY = Math.max(10, Math.min(window.innerHeight - 80, initialPos.current.y + deltaY))
+      setPosition({ x: newX, y: newY })
+    }
+  }
+
+  const handleTouchEnd = () => {
+    // Nếu kéo thả nhẹ không đáng kể thì tính là cú Bấm (Click)
+  }
+
+  // 3. Logic Fetch dữ liệu thời tiết & Thời gian thực
   useEffect(() => {
     if (!mounted) return
 
@@ -238,16 +275,46 @@ export default function WeatherWidget({ onSelectCategory }) {
 
   return (
     <>
-      {/* 📱 NÚT NỔI TRÊN MOBILE (Nằm góc trái dưới) */}
-      <div className="xl:hidden fixed bottom-6 left-4 z-40">
-        <button
-          onClick={() => setIsMobileOpen(true)}
-          className="w-12 h-12 bg-white/95 backdrop-blur-md rounded-full shadow-xl border-2 border-amber-300/80 flex items-center justify-center text-2xl active:scale-90 transition-transform"
-          aria-label="Thời tiết & Gợi ý"
+      {/* 📱 NÚT NỔI MOBILE - CÓ THỂ KÉO THẢ & NÚT TẠM ẨN */}
+      {!isMobileHidden && (
+        <div
+          className="xl:hidden fixed z-40 touch-none select-none group"
+          style={{
+            bottom: `${position.y}px`,
+            left: `${position.x}px`,
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
-          {weather.icon}
-        </button>
-      </div>
+          <div className="relative">
+            {/* Nút X nhỏ góc trên để ẩn tạm thời */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsMobileHidden(true)
+              }}
+              className="absolute -top-1 -right-1 w-5 h-5 bg-stone-800 text-white rounded-full flex items-center justify-center text-[10px] shadow-md z-10 font-bold"
+              title="Ẩn nút thời tiết"
+            >
+              ✕
+            </button>
+
+            {/* Nút icon tròn chính */}
+            <button
+              onClick={() => {
+                if (!isDragging.current) {
+                  setIsMobileOpen(true)
+                }
+              }}
+              className="w-12 h-12 bg-white/95 backdrop-blur-md rounded-full shadow-xl border-2 border-amber-300/80 flex items-center justify-center text-2xl active:scale-95 transition-transform"
+              aria-label="Thời tiết & Gợi ý"
+            >
+              {weather.icon}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 📱 POPUP TRÊN MOBILE */}
       {isMobileOpen && (
@@ -270,7 +337,7 @@ export default function WeatherWidget({ onSelectCategory }) {
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-3xl shrink-0 animate-bounce">{weather.icon}</span>
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-amber-950 truncate" title={weather.city}>
+                  <div className="text-xs font-bold text-amber-950 truncate max-w-[170px]" title={weather.city}>
                     📍 {weather.city}
                   </div>
                   <div className="text-[11px] text-amber-900/80 font-semibold truncate">
@@ -364,8 +431,7 @@ export default function WeatherWidget({ onSelectCategory }) {
                 </div>
               </div>
             </div>
-            
-            {/* Nút Gợi Ý cố định không rớt dòng */}
+
             <span className="shrink-0 whitespace-nowrap text-[10px] bg-white/80 text-amber-900 font-bold px-2.5 py-0.5 rounded-full border border-amber-300/80 shadow-xs">
               Gợi Ý
             </span>
