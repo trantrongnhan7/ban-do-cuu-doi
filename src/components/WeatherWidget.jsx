@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 
 export default function WeatherWidget({ onSelectCategory }) {
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [weather, setWeather] = useState({
     city: 'Đang xác định...',
     temp: '--',
@@ -12,49 +14,51 @@ export default function WeatherWidget({ onSelectCategory }) {
     suggestion: 'Đang tìm gợi ý vị giác phù hợp nhất...',
     bgGradient: 'from-amber-50 to-orange-50',
   })
+
+  // 1. Chỉ kích hoạt sau khi đã mount xong trên Client (Tránh lỗi Hydration/SSR)
   useEffect(() => {
+    setMounted(true)
+
     const handleScroll = () => {
-      if (window.scrollY > 120) {
-        setIsScrolled(true)
-      } else {
-        setIsScrolled(false)
+      if (typeof window !== 'undefined') {
+        if (window.scrollY > 120) {
+          setIsScrolled(true)
+        } else {
+          setIsScrolled(false)
+        }
       }
     }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', handleScroll)
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('scroll', handleScroll)
+      }
+    }
   }, [])
 
+  // 2. Logic tính toán 7 khung giờ và trạng thái thời tiết
   useEffect(() => {
-    // 1. Phân loại 7 khung giờ trong ngày
+    if (!mounted) return
+
     const getTimePeriod = (hour) => {
-      if (hour >= 4 && hour < 6) {
-        return { label: 'Sáng sớm', icon: '🌅' }
-      }
-      if (hour >= 6 && hour < 11) {
-        return { label: 'Buổi sáng', icon: '☀️' }
-      }
-      if (hour >= 11 && hour < 14) {
-        return { label: 'Buổi trưa', icon: '🌤️' }
-      }
-      if (hour >= 14 && hour < 16) {
-        return { label: 'Buổi chiều', icon: '🌤️' }
-      }
-      if (hour >= 16 && hour < 18) {
-        return { label: 'Xế chiều', icon: '🌆' }
-      }
-      if (hour >= 18 && hour < 22) {
-        return { label: 'Buổi tối', icon: '🌙' }
-      }
-      return { label: 'Nửa đêm', icon: '🌌' } // 22h - 3h59
+      if (hour >= 4 && hour < 6) return { label: 'Sáng sớm', icon: '🌅' }
+      if (hour >= 6 && hour < 11) return { label: 'Buổi sáng', icon: '☀️' }
+      if (hour >= 11 && hour < 14) return { label: 'Buổi trưa', icon: '🌤️' }
+      if (hour >= 14 && hour < 16) return { label: 'Buổi chiều', icon: '🌤️' }
+      if (hour >= 16 && hour < 18) return { label: 'Xế chiều', icon: '🌆' }
+      if (hour >= 18 && hour < 22) return { label: 'Buổi tối', icon: '🌙' }
+      return { label: 'Nửa đêm', icon: '🌌' }
     }
 
-    // 2. Phân tích kết hợp Thời gian 7 khung giờ + Dạng thời tiết
     const parseWeatherAndPeriod = (code, temp, hour) => {
       const period = getTimePeriod(hour)
       const isRaining = [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 97, 98, 99].includes(code)
       const isStorm = [65, 82, 95, 96, 97, 98, 99].includes(code)
 
-      // Trường hợp Mưa giông / Bão
       if (isStorm) {
         return {
           periodLabel: period.label,
@@ -65,7 +69,6 @@ export default function WeatherWidget({ onSelectCategory }) {
         }
       }
 
-      // Trường hợp Mưa rào / Mưa phùn
       if (isRaining) {
         return {
           periodLabel: period.label,
@@ -76,7 +79,6 @@ export default function WeatherWidget({ onSelectCategory }) {
         }
       }
 
-      // Trường hợp Sương mù / Âm u
       if ([45, 48, 3].includes(code)) {
         return {
           periodLabel: period.label,
@@ -87,7 +89,6 @@ export default function WeatherWidget({ onSelectCategory }) {
         }
       }
 
-      // Trường hợp Thời tiết lạnh / Rét (< 22°C)
       if (temp <= 22) {
         return {
           periodLabel: period.label,
@@ -98,7 +99,6 @@ export default function WeatherWidget({ onSelectCategory }) {
         }
       }
 
-      // Trường hợp Nắng gắt (> 32°C)
       if (temp >= 32) {
         return {
           periodLabel: period.label,
@@ -109,7 +109,6 @@ export default function WeatherWidget({ onSelectCategory }) {
         }
       }
 
-      // Thời tiết bình thường -> Gợi ý chi tiết theo từng khung giờ trong ngày
       switch (period.label) {
         case 'Sáng sớm':
           return {
@@ -159,7 +158,7 @@ export default function WeatherWidget({ onSelectCategory }) {
             suggestion: 'Tối đến phố xá lên đèn, rủ cạ cứng đi ăn đồ nướng, lẩu hoặc lai rai vài món nhậu thôi!',
             bgGradient: 'from-indigo-50 to-slate-100',
           }
-        default: // Nửa đêm
+        default:
           return {
             periodLabel: period.label,
             icon: '🌌',
@@ -170,7 +169,6 @@ export default function WeatherWidget({ onSelectCategory }) {
       }
     }
 
-    // 3. Lấy thời tiết thời gian thực
     const fetchRealWeather = async (lat = 10.8231, lon = 106.6297, cityName = 'TP. Hồ Chí Minh') => {
       const currentHour = new Date().getHours()
       try {
@@ -193,8 +191,7 @@ export default function WeatherWidget({ onSelectCategory }) {
           bgGradient: parsed.bgGradient,
         })
       } catch (err) {
-        // Fallback
-        const parsed = parseWeatherAndPeriod(0, 28, currentHour)
+        const parsed = parseWeatherAndPeriod(0, 28, new Date().getHours())
         setWeather((prev) => ({
           ...prev,
           timePeriodLabel: parsed.periodLabel,
@@ -204,7 +201,7 @@ export default function WeatherWidget({ onSelectCategory }) {
       }
     }
 
-    if (navigator.geolocation) {
+    if (typeof window !== 'undefined' && navigator?.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => fetchRealWeather(pos.coords.latitude, pos.coords.longitude, 'Vị trí của bạn'),
         () => fetchRealWeather()
@@ -212,7 +209,10 @@ export default function WeatherWidget({ onSelectCategory }) {
     } else {
       fetchRealWeather()
     }
-  }, [])
+  }, [mounted])
+
+  // Không render component trên Server để tránh crash
+  if (!mounted) return null
 
   return (
     <aside
@@ -224,7 +224,6 @@ export default function WeatherWidget({ onSelectCategory }) {
           : 'w-60 p-4 rounded-3xl items-stretch'
       }`}
     >
-      {/* Khi đã cuộn xuống: Hiện Nút Tròn Nhỏ gọn chứa Icon */}
       {isScrolled && (
         <div
           className="flex items-center justify-center w-full h-full group-hover:hidden"
@@ -234,7 +233,6 @@ export default function WeatherWidget({ onSelectCategory }) {
         </div>
       )}
 
-      {/* Nội dung đầy đủ (Tự động xòe ra khi hover vào nút tròn hoặc khi ở đầu trang) */}
       <div
         className={
           isScrolled

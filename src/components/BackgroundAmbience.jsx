@@ -14,6 +14,10 @@ export default function BackgroundAmbience() {
   const sourceNodeRef = useRef(null)
 
   const pathname = usePathname()
+  if (pathname?.startsWith('/studio')) {
+    return null
+  }
+
 
   // 1. Khởi tạo Web Audio API & Low-pass Filter
   const initAudioContext = () => {
