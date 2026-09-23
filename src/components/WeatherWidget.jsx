@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 
 export default function WeatherWidget({ onSelectCategory }) {
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isMobileOpen, setIsMobileOpen] = useState(false) // State bật/tắt menu trên mobile
   const [mounted, setMounted] = useState(false)
   const [weather, setWeather] = useState({
     city: 'Đang xác định...',
@@ -15,7 +16,6 @@ export default function WeatherWidget({ onSelectCategory }) {
     bgGradient: 'from-amber-50 to-orange-50',
   })
 
-  // 1. Chỉ kích hoạt sau khi đã mount xong trên Client (Tránh lỗi Hydration/SSR)
   useEffect(() => {
     setMounted(true)
 
@@ -40,7 +40,6 @@ export default function WeatherWidget({ onSelectCategory }) {
     }
   }, [])
 
-  // 2. Logic tính toán 7 khung giờ và trạng thái thời tiết
   useEffect(() => {
     if (!mounted) return
 
@@ -169,9 +168,34 @@ export default function WeatherWidget({ onSelectCategory }) {
       }
     }
 
-    const fetchRealWeather = async (lat = 10.8231, lon = 106.6297, cityName = 'TP. Hồ Chí Minh') => {
+    // Hàm lấy tên Quận/Huyện/Thành phố cụ thể từ GPS
+    const getDetailedLocationName = async (lat, lon) => {
+      try {
+        const res = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`
+        )
+        const data = await res.json()
+        const district = data.locality || data.city || data.principalSubdivision
+        const city = data.principalSubdivision || ''
+
+        if (district && city && district !== city) {
+          return `${district}, ${city}`
+        }
+        return district || city || 'Vị trí của bạn'
+      } catch (e) {
+        return 'Vị trí của bạn'
+      }
+    }
+
+    // Lấy thời tiết thời gian thực kèm vị trí cụ thể
+    const fetchRealWeather = async (lat = 10.8231, lon = 106.6297, isDefault = false) => {
       const currentHour = new Date().getHours()
       try {
+        let locationName = 'TP. Hồ Chí Minh'
+        if (!isDefault) {
+          locationName = await getDetailedLocationName(lat, lon)
+        }
+
         const res = await fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto`
         )
@@ -182,7 +206,7 @@ export default function WeatherWidget({ onSelectCategory }) {
         const parsed = parseWeatherAndPeriod(code, temp, currentHour)
 
         setWeather({
-          city: cityName,
+          city: locationName,
           temp: temp,
           timePeriodLabel: parsed.periodLabel,
           condition: parsed.condition,
@@ -194,6 +218,7 @@ export default function WeatherWidget({ onSelectCategory }) {
         const parsed = parseWeatherAndPeriod(0, 28, new Date().getHours())
         setWeather((prev) => ({
           ...prev,
+          city: 'TP. Hồ Chí Minh',
           timePeriodLabel: parsed.periodLabel,
           condition: 'Thời tiết dễ chịu',
           suggestion: parsed.suggestion,
@@ -203,100 +228,125 @@ export default function WeatherWidget({ onSelectCategory }) {
 
     if (typeof window !== 'undefined' && navigator?.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => fetchRealWeather(pos.coords.latitude, pos.coords.longitude, 'Vị trí của bạn'),
-        () => fetchRealWeather()
+        (pos) => fetchRealWeather(pos.coords.latitude, pos.coords.longitude, false),
+        () => fetchRealWeather(10.8231, 106.6297, true)
       )
     } else {
-      fetchRealWeather()
+      fetchRealWeather(10.8231, 106.6297, true)
     }
   }, [mounted])
 
-  // Không render component trên Server để tránh crash
   if (!mounted) return null
 
   return (
-    <aside
-      className={`fixed top-24 left-3 z-30 hidden xl:flex flex-col bg-gradient-to-br ${
-        weather.bgGradient
-      } backdrop-blur-md border border-amber-200/80 shadow-lg transition-all duration-300 group cursor-pointer ${
-        isScrolled
-          ? 'w-12 h-12 p-0 rounded-full items-center justify-center hover:w-60 hover:h-auto hover:p-4 hover:rounded-3xl hover:items-stretch'
-          : 'w-60 p-4 rounded-3xl items-stretch'
-      }`}
-    >
-      {isScrolled && (
-        <div
-          className="flex items-center justify-center w-full h-full group-hover:hidden"
-          title="Bấm để xem thời tiết & gợi ý món"
-        >
-          <span className="text-xl animate-pulse">{weather.icon}</span>
-        </div>
-      )}
-
-      <div
-        className={
-          isScrolled
-            ? 'hidden group-hover:flex flex-col gap-3'
-            : 'flex flex-col gap-3'
-        }
-      >
-        <div className="flex items-center justify-between border-b border-amber-200/60 pb-2.5">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl animate-bounce" style={{ animationDuration: '3s' }}>
-              {weather.icon}
-            </span>
-            <div>
-              <div className="text-xs font-bold text-amber-950 flex items-center gap-1">
-                📍 {weather.city}
-              </div>
-              <div className="text-[11px] text-amber-900/80 font-semibold">
-                {weather.timePeriodLabel} • {weather.temp}°C
-              </div>
-            </div>
-          </div>
-          <span className="text-[10px] bg-white/80 text-amber-900 font-bold px-2 py-0.5 rounded-full border border-amber-300/80 shadow-xs">
-            Gợi Ý
-          </span>
-        </div>
-
-        <p className="text-xs text-slate-800 leading-relaxed font-medium italic">
-          "{weather.suggestion}"
-        </p>
-
+    <>
+      {/* 📱 NÚT ICON BẤM BẬT/TẮT TRÊN ĐIỆN THOẠI IPHONE / MOBILE (Cố định góc trái dưới màn hình) */}
+      <div className="xl:hidden fixed bottom-6 left-4 z-40">
         <button
-          onClick={(e) => {
-            e.stopPropagation()
-            if (!onSelectCategory) return
-
-            const currentHour = new Date().getHours()
-            const isRainingOrCold =
-              weather.condition.includes('Mưa') ||
-              weather.condition.includes('bão') ||
-              weather.temp <= 22
-
-            if (isRainingOrCold) {
-              onSelectCategory('troilanh')
-              return
-            }
-
-            if (currentHour >= 5 && currentHour < 11) {
-              onSelectCategory('sang')
-            } else if (currentHour >= 11 && currentHour < 14) {
-              onSelectCategory('trua')
-            } else if (currentHour >= 14 && currentHour < 18) {
-              onSelectCategory('anchoi')
-            } else if (currentHour >= 18 && currentHour < 22) {
-              onSelectCategory('toi')
-            } else {
-              onSelectCategory('ankhuya')
-            }
-          }}
-          className="w-full mt-1 py-2 px-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+          onClick={() => setIsMobileOpen(!isMobileOpen)}
+          className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-amber-300 flex items-center justify-center text-xl active:scale-95 transition-transform"
+          aria-label="Thời tiết & Gợi ý"
         >
-          <span>🍲</span>
-          <span>Lọc món hợp thời tiết</span>
+          {weather.icon}
         </button>
       </div>
-    </aside>
+
+      {/* 🖥️ CẢ PC VÀ MOBILE: KHUNG POPUP / WIDGET */}
+      <aside
+        onClick={() => {
+          if (isMobileOpen) setIsMobileOpen(false)
+        }}
+        className={`fixed z-40 bg-gradient-to-br ${
+          weather.bgGradient
+        } backdrop-blur-md border border-amber-200/80 shadow-2xl xl:shadow-lg transition-all duration-300 group cursor-pointer ${
+          // Xử lý vị trí & kích thước cho Mobile vs Desktop
+          isMobileOpen
+            ? 'bottom-20 left-4 right-4 p-4 rounded-3xl flex flex-col xl:bottom-auto xl:left-3 xl:right-auto'
+            : 'hidden xl:flex fixed top-24 left-3 flex-col'
+        } ${
+          isScrolled && !isMobileOpen
+            ? 'xl:w-12 xl:h-12 xl:p-0 xl:rounded-full xl:items-center xl:justify-center xl:hover:w-60 xl:hover:h-auto xl:hover:p-4 xl:hover:rounded-3xl xl:hover:items-stretch'
+            : 'xl:w-60 xl:p-4 xl:rounded-3xl xl:items-stretch'
+        }`}
+      >
+        {/* Nút tròn thu gọn chỉ chạy ở màn hình PC lớn */}
+        {isScrolled && !isMobileOpen && (
+          <div
+            className="hidden xl:flex items-center justify-center w-full h-full group-hover:hidden"
+            title="Bấm để xem thời tiết & gợi ý món"
+          >
+            <span className="text-xl animate-pulse">{weather.icon}</span>
+          </div>
+        )}
+
+        {/* Nội dung chi tiết */}
+        <div
+          className={
+            isScrolled && !isMobileOpen
+              ? 'hidden group-hover:flex flex-col gap-3'
+              : 'flex flex-col gap-3'
+          }
+        >
+          <div className="flex items-center justify-between border-b border-amber-200/60 pb-2.5">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl animate-bounce" style={{ animationDuration: '3s' }}>
+                {weather.icon}
+              </span>
+              <div>
+                <div className="text-xs font-bold text-amber-950 flex items-center gap-1 truncate max-w-[170px]" title={weather.city}>
+                  📍 {weather.city}
+                </div>
+                <div className="text-[11px] text-amber-900/80 font-semibold">
+                  {weather.timePeriodLabel} • {weather.temp}°C
+                </div>
+              </div>
+            </div>
+            <span className="text-[10px] bg-white/80 text-amber-900 font-bold px-2 py-0.5 rounded-full border border-amber-300/80 shadow-xs">
+              Gợi Ý
+            </span>
+          </div>
+
+          <p className="text-xs text-slate-800 leading-relaxed font-medium italic">
+            "{weather.suggestion}"
+          </p>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsMobileOpen(false) // Đóng popup trên mobile sau khi chọn
+
+              if (!onSelectCategory) return
+
+              const currentHour = new Date().getHours()
+              const isRainingOrCold =
+                weather.condition.includes('Mưa') ||
+                weather.condition.includes('bão') ||
+                weather.temp <= 22
+
+              if (isRainingOrCold) {
+                onSelectCategory('troilanh')
+                return
+              }
+
+              if (currentHour >= 5 && currentHour < 11) {
+                onSelectCategory('sang')
+              } else if (currentHour >= 11 && currentHour < 14) {
+                onSelectCategory('trua')
+              } else if (currentHour >= 14 && currentHour < 18) {
+                onSelectCategory('anchoi')
+              } else if (currentHour >= 18 && currentHour < 22) {
+                onSelectCategory('toi')
+              } else {
+                onSelectCategory('ankhuya')
+              }
+            }}
+            className="w-full mt-1 py-2 px-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span>🍲</span>
+            <span>Lọc món hợp thời tiết</span>
+          </button>
+        </div>
+      </aside>
+    </>
   )
 }
