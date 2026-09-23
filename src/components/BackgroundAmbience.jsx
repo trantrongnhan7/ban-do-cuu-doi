@@ -81,7 +81,7 @@ export default function BackgroundAmbience() {
           {isPlaying ? '🔊' : '🔇'}
         </span>
         <span className="hidden sm:inline-block">
-          {isPlaying ? 'Phố Ẩm Thực' : 'Mở Âm Thanh'}
+          {isPlaying ? 'Đi Chợ' : 'Mở Âm Thanh'}
         </span>
 
         {/* Hiệu ứng sóng âm khi đang bật */}
