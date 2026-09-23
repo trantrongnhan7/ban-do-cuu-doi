@@ -84,27 +84,29 @@ export default async function RecipeDetail({ params }) {
               className="object-cover"
               priority
             />
-            <span className="absolute top-4 right-4 bg-amber-950/80 backdrop-blur-md text-amber-100 text-xs px-3 py-1.5 rounded-full border border-amber-700/40 font-medium">
-              {dish.region}
-            </span>
+            <span className="absolute top-2 right-2 bg-amber-950/70 backdrop-blur-md text-amber-100 text-[10px] px-2.5 py-0.5 rounded-full border border-amber-700/30 font-medium">
+                {item.region === 'ca-3-mien' || item.region === 'Cả 3 Miền'
+                   ? 'Cả 3 Miền'
+                      : item.region === 'mien-bac' || item.region === 'Miền Bắc'
+                    ? 'Miền Bắc'
+                     : item.region === 'mien-trung' || item.region === 'Miền Trung'
+                    ? 'Miền Trung'
+                    : item.region === 'mien-nam' || item.region === 'Miền Nam'
+                    ? 'Miền Nam'
+                    : item.region || 'Cả 3 Miền'}
+             </span>
           </div>
 
           {/* Nội dung chi tiết */}
-          <div className="p-6 sm:p-10">
-            <h1 className="font-[family-name:var(--font-playful)] text-3xl sm:text-4xl font-extrabold text-amber-950 mb-4">
-              {dish.title}
-            </h1>
-
-            {/* Các tags */}
-            <div className="flex flex-wrap gap-2 mb-8">
-              {dish.tags?.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="bg-amber-100/70 text-amber-800 text-xs px-2.5 py-1 rounded-md font-medium border border-amber-200"
-                >
-                  #{tag}
-                </span>
-              ))}
+          <div className="flex flex-wrap gap-2 mt-4">
+           {dish.hashtags?.map((tag, idx) => (
+            <span
+              key={idx}
+              className="bg-amber-100/80 text-amber-900 text-xs font-semibold px-3 py-1 rounded-full border border-amber-200"
+            >
+            #{tag}
+            </span>
+          ))}
             </div>
 
             {/* Câu chuyện món ăn */}
@@ -150,9 +152,21 @@ export default async function RecipeDetail({ params }) {
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-2xl shadow-lg border border-amber-300/40">
                 <span className="text-xl">🍲</span>
-                <h3 className="text-base sm:text-lg font-black tracking-wide uppercase">
-                  Món Ngon Khác Ở {dish.region}
-                </h3>
+                {/* Hàm định dạng hiển thị tên Vùng Miền */}
+{(() => {
+  const regionName = 
+    dish.region === 'ca-3-mien' || dish.region === 'Cả 3 Miền' ? 'CẢ 3 MIỀN' :
+    dish.region === 'mien-bac' || dish.region === 'Miền Bắc' ? 'MIỀN BẮC' :
+    dish.region === 'mien-trung' || dish.region === 'Miền Trung' ? 'MIỀN TRUNG' :
+    dish.region === 'mien-nam' || dish.region === 'Miền Nam' ? 'MIỀN NAM' :
+    (dish.region || 'CẢ 3 MIỀN').toUpperCase();
+
+  return (
+    <h3 className="text-lg font-bold text-amber-950 uppercase">
+      🍢 MÓN NGON KHÁC Ở {regionName}
+    </h3>
+  );
+})()}
               </div>
 
               <span className="text-xs font-bold text-amber-900 bg-amber-100 px-3.5 py-1.5 rounded-full border border-amber-300 shadow-sm">
