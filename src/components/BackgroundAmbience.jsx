@@ -66,7 +66,7 @@ export default function BackgroundAmbience() {
       {/* Thẻ Audio chạy ẩn ở nền */}
       <audio
         ref={audioRef}
-        src="/sounds/street_ambience 1.mp3"
+        src="/sounds/street_ambience 2.mp3"
         loop
         preload="auto"
       />
@@ -81,7 +81,7 @@ export default function BackgroundAmbience() {
           {isPlaying ? '🔊' : '🔇'}
         </span>
         <span className="hidden sm:inline-block">
-          {isPlaying ? 'Đi Chợ' : 'Mở Âm Thanh'}
+          {isPlaying ? 'Quán Nhậu Đường Phố' : 'Mở Âm Thanh'}
         </span>
 
         {/* Hiệu ứng sóng âm khi đang bật */}
