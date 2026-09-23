@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
 import RandomDishModal from './RandomDishModal'
 import WeatherWidget from '@/components/WeatherWidget'
+import TrendingWidget from '@/components/TrendingWidget'
 
 export function DishList({ dishes }) {
   const [searchQuery, setSearchQuery] = useState('')
@@ -129,6 +130,7 @@ export function DishList({ dishes }) {
     <main className="relative min-h-screen bg-[#fbf8f2] py-12 px-4 sm:px-6 lg:px-8">
       {/* NỀN ẢNH ẨM THỰC PHỦ TOÀN BỘ TRANG WEB (CỐ ĐỊNH KHI CUỘN) */}
       <WeatherWidget onSelectCategory={(vibe) => setSelectedVibe(vibe)} />
+      <TrendingWidget dishes={dishes} />
       <div
         className="fixed inset-0 pointer-events-none opacity-10 bg-cover bg-center bg-fixed mix-blend-multiply z-0"
         style={{ backgroundImage: "url('/dao-ly-son.png')" }}
