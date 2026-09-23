@@ -246,8 +246,9 @@ export function DishList({ dishes }) {
                   className="bg-white rounded-2xl overflow-hidden border border-amber-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group relative"
                 >
                   {/* Hình ảnh & Nút Thả Tim */}
-                  <div className="relative h-48 w-full overflow-hidden bg-amber-100">
-                    {/* Hỗ trợ hiển thị cả imageUrl trực tiếp từ GROQ mới lẫn urlFor cũ */}
+                  <Link
+                    href={`/recipe/${dish.slug?.current || dish.slug}`}
+                    className="relative block h-48 w-full overflow-hidden bg-amber-100 cursor-pointer group/img">
                     {(dish.imageUrl || dish.image) && (
                       <Image
                         src={dish.imageUrl || urlFor(dish.image).url()}
@@ -300,7 +301,7 @@ export function DishList({ dishes }) {
                         Đã chép link! 📋
                       </span>
                     )}
-                  </div>
+                  </Link>
 
                   {/* Nội dung card */}
                   <div className="p-5 flex-1 flex flex-col justify-between">
