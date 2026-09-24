@@ -9,6 +9,7 @@ import WeatherWidget from '@/components/WeatherWidget'
 import TrendingWidget from '@/components/TrendingWidget'
 import TrendingBar from '@/components/TrendingBar'
 
+
 export function DishList({ dishes }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('all')
