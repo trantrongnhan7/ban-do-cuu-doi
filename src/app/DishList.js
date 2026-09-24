@@ -140,6 +140,7 @@ export function DishList({ dishes }) {
       matchesRegion =
         selectedRegion === 'all' ||
         dish.region === selectedRegion ||
+        (selectedRegion === 'ca-3-mien' && (dish.region === 'Cả 3 Miền' || dish.region === 'ca-3-mien')) ||
         (selectedRegion === 'bac' && (dish.region === 'Miền Bắc' || dish.region === 'mien-bac')) ||
         (selectedRegion === 'trung' && (dish.region === 'Miền Trung' || dish.region === 'mien-trung')) ||
         (selectedRegion === 'nam' && (dish.region === 'Miền Nam' || dish.region === 'mien-nam'))
@@ -213,6 +214,7 @@ export function DishList({ dishes }) {
             { id: 'bac', label: 'Miền Bắc 🏔️' },
             { id: 'trung', label: 'Miền Trung 🌊' },
             { id: 'nam', label: 'Miền Nam 🌴' },
+            { id: 'ca-3-mien', label: 'Cả 3 Miền 🍲' },
             { id: 'saved', label: `Đã Lưu ❤️ (${bookmarkedIds.length})` },
           ].map((tab) => (
             <button
@@ -228,6 +230,7 @@ export function DishList({ dishes }) {
             </button>
           ))}
         </div>
+
 
         {/* 👈 BỘ LỌC TÌNH HUỐNG CỨU ĐÓI (VIBE FILTER) */}
         <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
