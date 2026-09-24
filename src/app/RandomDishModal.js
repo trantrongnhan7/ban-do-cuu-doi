@@ -25,7 +25,7 @@ export const getRarityInfo = (dish) => {
         badge: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black animate-bounce shadow-lg',
         glow: 'border-amber-400 shadow-[0_0_60px_rgba(245,158,11,0.9)] ring-4 ring-amber-400',
         sound: 'win_ssr',
-        weight: 1, // Tỉ lệ hiếm nhất (~5%)
+        weight: 2, // Tỉ lệ hiếm nhất (~5%)
       };
     case 'SR':
       return {
@@ -36,7 +36,7 @@ export const getRarityInfo = (dish) => {
         badge: 'bg-purple-600 text-white font-bold shadow-md',
         glow: 'border-purple-500 shadow-[0_0_40px_rgba(168,85,247,0.6)] ring-2 ring-purple-500',
         sound: 'win_sr',
-        weight: 3, // Tỉ lệ vừa (~15%)
+        weight: 4, // Tỉ lệ vừa (~15%)
       };
     case 'R':
       return {
@@ -58,7 +58,7 @@ export const getRarityInfo = (dish) => {
         badge: 'bg-emerald-600 text-white font-bold shadow-sm',
         glow: 'border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400',
         sound: 'win_n',
-        weight: 10, // Tỉ lệ cao nhất (~50%)
+        weight: 8, // Tỉ lệ cao nhất (~50%)
       };
   }
 };
