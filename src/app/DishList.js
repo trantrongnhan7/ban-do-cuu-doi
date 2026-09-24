@@ -78,20 +78,7 @@ export function DishList({ dishes }) {
 
         // Lấy danh sách Ngữ Cảnh Vibe an toàn
         const occasionsData = dish.occasion || []
-        const occasions = Array.isArray(occasionsData) ? occasionsData : [occasionsData]
-
-        // Nếu món ăn được chọn "Mọi lúc" -> Luôn thỏa mãn
-        if (
-          times.some(
-            (t) =>
-              t &&
-              (t.toString().toLowerCase().includes('moi-luc') ||
-                t.toString().toLowerCase().includes('moiluc') ||
-                t.toString().includes('Mọi lúc'))
-          )
-        ) {
-          return true
-        }
+        const occasions = Array.isArray(occasionsData) ? occasionsData : [occasionsData]        
 
         // Lọc Khung Giờ
         if (selectedVibe === 'sang') {
