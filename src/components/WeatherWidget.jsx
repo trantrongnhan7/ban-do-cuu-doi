@@ -135,7 +135,7 @@ export default function WeatherWidget({ onSelectCategory }) {
         }
       }
 
-      if (temp >= 32) {
+      if (temp >= 30) {
         return {
           periodLabel: period.label,
           icon: '🔥',
