@@ -251,7 +251,23 @@ export function DishList({ dishes }) {
             </button>
           ))}
         </div>
-
+        
+         {/* 🟢 CHÈN NÚT RESET FILTER (BỎ LỌC THỜI TIẾT / KHUNG GIỜ / VIBE) VÀO ĐÂY */}
+        {selectedVibe && (
+          <div className="flex items-center justify-center gap-2 pt-2 animate-fade-in">
+            <span className="text-xs text-amber-800 font-medium">
+              Đang xem gợi ý hợp thời tiết / khung giờ
+            </span>
+            <button
+              onClick={() => setSelectedVibe(null)}
+              className="bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm transition-all flex items-center gap-1 active:scale-95 cursor-pointer"
+            >
+              <span>Hiện tất cả món</span>
+              <span>✕</span>
+            </button>
+          </div>
+        )}
+        
         {/* Hiển thị Tag đang được chọn (nếu có) */}
         {selectedTag && (
           <div className="flex items-center justify-center gap-2 pt-2 animate-fade-in">
