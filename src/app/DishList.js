@@ -76,6 +76,23 @@ export function DishList({ dishes }) {
           : dish.occasion
           ? [dish.occasion]
           : []
+        if (times.includes('moi-luc') || times.includes('Mọi lúc') || times.includes('moiluc')) {
+          return true
+        }
+
+        // Lọc theo từng Khung Giờ trong ngày
+        if (selectedVibe === 'sang') {
+          return times.includes('sang') || times.includes('Sáng')
+        }
+        if (selectedVibe === 'trua') {
+          return times.includes('trua') || times.includes('Trưa')
+        }
+        if (selectedVibe === 'toi') {
+          return times.includes('toi') || times.includes('Tối')
+        }
+        if (selectedVibe === 'ankhuya') {
+          return times.includes('an-khuya') || times.includes('ankhuya') || times.includes('Ăn Khuya')
+        }
 
         if (selectedVibe === 'chaytui') {
           return occasions.includes('cuoi-thang-chay-tui') || occasions.includes('cuoithang')

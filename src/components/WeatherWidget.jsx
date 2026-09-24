@@ -370,9 +370,9 @@ export default function WeatherWidget({ onSelectCategory }) {
                   return
                 }
 
-                if (currentHour >= 5 && currentHour < 11) {
+                if (currentHour >= 4 && currentHour < 10) {
                   onSelectCategory('sang')
-                } else if (currentHour >= 11 && currentHour < 14) {
+                } else if (currentHour >= 10 && currentHour < 14) {
                   onSelectCategory('trua')
                 } else if (currentHour >= 14 && currentHour < 18) {
                   onSelectCategory('anchoi')
@@ -380,6 +380,10 @@ export default function WeatherWidget({ onSelectCategory }) {
                   onSelectCategory('toi')
                 } else {
                   onSelectCategory('ankhuya')
+                }
+                // Tự động cuộn xuống danh sách món ăn
+                if (typeof window !== 'undefined') {
+                  window.scrollTo({ top: 480, behavior: 'smooth' })
                 }
               }}
               className="w-full mt-1 py-2.5 px-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs rounded-xl shadow-md active:scale-95 transition-transform flex items-center justify-center gap-1.5 cursor-pointer"
