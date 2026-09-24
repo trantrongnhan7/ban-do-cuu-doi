@@ -2,6 +2,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { client, urlFor } from '@/lib/sanity'
 import { notFound } from 'next/navigation'
+import { getSiteUrl } from '@/lib/getSiteUrl'
+
+const siteUrl = getSiteUrl()
 
 // 1. Tối ưu SEO cho link
 export async function generateMetadata({ params }) {
@@ -136,7 +139,7 @@ export default async function RecipeDetail({ params }) {
 
             {/* Câu chuyện món ăn */}
             <section className="mb-8">
-              <h2 className="font-[family-name:var(--font-mono)] text-lg font-bold text-amber-900 border-b border-amber-200 pb-2 mb-3">
+              <h2 className="font-mono text-lg font-bold text-amber-900 border-b border-amber-200 pb-2 mb-3">
                 &gt; Câu chuyện món ăn_
               </h2>
               <p className="text-slate-700 leading-relaxed text-base whitespace-pre-line">
@@ -146,7 +149,7 @@ export default async function RecipeDetail({ params }) {
 
             {/* Nguyên liệu chính */}
             <section className="bg-amber-50/60 p-5 rounded-2xl border border-amber-200/60">
-              <h3 className="font-[family-name:var(--font-mono)] text-base font-bold text-amber-900 mb-3 flex items-center gap-2">
+              <h3 className="font-mono text-base font-bold text-amber-900 mb-3 flex items-center gap-2">
                 🛒 Nguyên liệu chính
               </h3>
 
@@ -175,7 +178,7 @@ export default async function RecipeDetail({ params }) {
         {relatedDishes && relatedDishes.length > 0 && (
           <section className="mt-12 pt-8 border-t border-amber-200/80">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-              <div className="flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-2xl shadow-lg border border-amber-300/40">
+              <div className="flex items-center gap-2.5 bg-linear-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-2xl shadow-lg border border-amber-300/40">
                 <span className="text-xl">🍲</span>
                 <h3 className="text-lg font-bold text-white uppercase tracking-wide">
                   MÓN NGON KHÁC Ở {regionDisplayName}
