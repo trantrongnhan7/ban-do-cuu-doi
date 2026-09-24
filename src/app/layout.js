@@ -58,7 +58,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Bản Đồ Cứu Đói 🥢',
+    title: 'Bản Đồ Cứu Đói 🥢 | Vị giác 3 miền',
     description: 'Bản đồ vị giác 3 miền & Gacha gợi ý món ăn chuẩn thời tiết.',
     images: [`${siteUrl}/hero-banner.jpg`],
   },
