@@ -23,6 +23,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 })
 
 export const metadata = {
+  metadataBase: new URL('https://bandovigiac.vercel.app'),
   title: 'Bản Đồ Cứu Đói 🥢 | Khám Phá Ẩm Thực Việt Nam 3 Miền',
   description:
     'Bản đồ vị giác 3 miền: Lưu giữ hương vị xưa bằng góc nhìn mới. Gợi ý món ăn thông minh theo thời tiết, vị trí và vòng quay Gacha ẩm thực.',

@@ -13,15 +13,27 @@ export async function generateMetadata({ params }) {
 
   if (!dish) return { title: 'Không tìm thấy món ăn' }
 
-  const imageUrl = dish.image ? urlFor(dish.image).width(1200).height(630).url() : ''
+  const imageUrl = dish.image
+    ? urlFor(dish.image).width(1200).height(630).url()
+    : 'https://bandovigiac.vercel.app/hero-banner.jpg'
 
   return {
-    title: `${dish.title} | Bản Đồ Cứu Đói`,
-    description: dish.story || dish.description || 'Khám phá công thức và nguyên liệu món ăn đặc sản Việt Nam.',
+    title: `${dish.title} | Bản Đồ Cứu Đói 🥢`,
+    description: dish.story || dish.description || `Khám phá công thức và nguyên liệu món ăn đặc sản Việt Nam.`,
     openGraph: {
-      title: dish.title,
-      description: dish.story || dish.description,
-      images: [imageUrl],
+      title: `${dish.title} - Bản Đồ Cứu Đói 🥢`,
+      description: dish.story || dish.description || `Khám phá công thức và nguyên liệu món ăn đặc sản Việt Nam.`,
+      url: `https://bandovigiac.vercel.app/recipe/${slug}`,
+      siteName: 'Bản Đồ Cứu Đói',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: dish.title,
+        },
+      ],
+      type: 'article',
     },
   }
 }
