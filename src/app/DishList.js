@@ -64,48 +64,72 @@ export function DishList({ dishes }) {
       })
     }
   }
-  // Lọc danh sách món ăn
+  // Lọc danh sách món ăn an toàn, chống crash trang web
   const filteredDishes = dishes.filter((dish) => {
-    // 1. Lọc theo Tình huống (CHỈ đọc trực tiếp dữ liệu tích chọn từ ô Ngữ Cảnh Ăn Uống trong Studio)
+    if (!dish) return false
+
+    // 1. Lọc theo Khung Giờ & Ngữ Cảnh Ăn Uống từ Sanity Studio
     const matchesVibe =
       !selectedVibe ||
       (() => {
-        // Lấy danh sách các mục occasion đã tích trong Sanity (mảng các chuỗi slug)
-        const occasions = Array.isArray(dish.occasion)
-          ? dish.occasion
-          : dish.occasion
-          ? [dish.occasion]
-          : []
-        if (times.includes('moi-luc') || times.includes('Mọi lúc') || times.includes('moiluc')) {
+        // Lấy danh sách Khung Giờ an toàn (tránh bị undefined/null)
+        const timesData = dish.timeOfDay || dish.mealTime || dish.suitableTime || []
+        const times = Array.isArray(timesData) ? timesData : [timesData]
+
+        // Lấy danh sách Ngữ Cảnh Vibe an toàn
+        const occasionsData = dish.occasion || []
+        const occasions = Array.isArray(occasionsData) ? occasionsData : [occasionsData]
+
+        // Nếu món ăn được chọn "Mọi lúc" -> Luôn thỏa mãn
+        if (
+          times.some(
+            (t) =>
+              t &&
+              (t.toString().toLowerCase().includes('moi-luc') ||
+                t.toString().toLowerCase().includes('moiluc') ||
+                t.toString().includes('Mọi lúc'))
+          )
+        ) {
           return true
         }
 
-        // Lọc theo từng Khung Giờ trong ngày
+        // Lọc Khung Giờ
         if (selectedVibe === 'sang') {
-          return times.includes('sang') || times.includes('Sáng')
+          return times.some((t) => t && (t === 'sang' || t === 'Sáng'))
         }
         if (selectedVibe === 'trua') {
-          return times.includes('trua') || times.includes('Trưa')
+          return times.some((t) => t && (t === 'trua' || t === 'Trưa'))
         }
         if (selectedVibe === 'toi') {
-          return times.includes('toi') || times.includes('Tối')
+          return times.some((t) => t && (t === 'toi' || t === 'Tối'))
         }
         if (selectedVibe === 'ankhuya') {
-          return times.includes('an-khuya') || times.includes('ankhuya') || times.includes('Ăn Khuya')
+          return times.some(
+            (t) => t && (t === 'an-khuya' || t === 'ankhuya' || t === 'Ăn Khuya')
+          )
         }
 
+        // Lọc Ngữ Cảnh Vibe
         if (selectedVibe === 'chaytui') {
-          return occasions.includes('cuoi-thang-chay-tui') || occasions.includes('cuoithang')
+          return occasions.some(
+            (o) => o && (o === 'cuoi-thang-chay-tui' || o === 'cuoithang')
+          )
         }
         if (selectedVibe === 'troilanh') {
-          return occasions.includes('tru-lanh-ngay-mua') || occasions.includes('troilanh')
+          return (
+            occasions.some((o) => o && (o === 'tru-lanh-ngay-mua' || o === 'troilanh')) ||
+            times.some((t) => t && t === 'troilanh')
+          )
         }
         if (selectedVibe === 'anchoi') {
-          return occasions.includes('an-choi-tan-gau') || occasions.includes('anchoi')
+          return occasions.some(
+            (o) => o && (o === 'an-choi-tan-gau' || o === 'anchoi')
+          )
         }
         if (selectedVibe === 'nhau') {
-          return occasions.includes('nhau-toi-ben') || occasions.includes('nhau')
+          return occasions.some((o) => o && (o === 'nhau-toi-ben' || o === 'nhau'))
         }
+
         return true
       })()
 
@@ -116,9 +140,9 @@ export function DishList({ dishes }) {
       dish.title?.toLowerCase().includes(query) ||
       dish.story?.toLowerCase().includes(query) ||
       dish.description?.toLowerCase().includes(query) ||
-      dish.hashtags?.some((tag) => tag.toLowerCase().includes(query)) ||
-      dish.tasteProfiles?.some((taste) => taste.toLowerCase().includes(query)) ||
-      dish.ingredients?.some((ing) => ing.toLowerCase().includes(query))
+      dish.hashtags?.some((tag) => tag && tag.toLowerCase().includes(query)) ||
+      dish.tasteProfiles?.some((taste) => taste && taste.toLowerCase().includes(query)) ||
+      dish.ingredients?.some((ing) => ing && ing.toLowerCase().includes(query))
 
     // 3. Lọc theo Vùng miền / Đã lưu
     let matchesRegion = true
@@ -138,8 +162,8 @@ export function DishList({ dishes }) {
     // 4. Lọc theo Hashtag đang chọn
     const matchesTag =
       !selectedTag ||
-      dish.hashtags?.some((t) => t.toLowerCase() === selectedTag.toLowerCase()) ||
-      dish.tags?.some((t) => t.toLowerCase() === selectedTag.toLowerCase())
+      dish.hashtags?.some((t) => t && t.toLowerCase() === selectedTag.toLowerCase()) ||
+      dish.tags?.some((t) => t && t.toLowerCase() === selectedTag.toLowerCase())
 
     return matchesSearch && matchesRegion && matchesTag && matchesVibe
   })
