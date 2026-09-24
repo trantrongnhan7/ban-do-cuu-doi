@@ -110,7 +110,7 @@ export default function WeatherWidget({ onSelectCategory }) {
           periodLabel: period.label,
           icon: '🌧️',
           condition: 'Trời mưa ướt át',
-          suggestion: `${period.label} trời mưa râm râm mát lạnh, húp ngay một tô Bún Mọc hoặc Phở nóng hổi thôi!`,
+          suggestion: `${period.label} trời mưa râm râm mát mẻ, húp ngay một tô Bún Mọc hoặc Phở nóng hổi thôi!`,
           bgGradient: 'from-sky-50 to-blue-100',
         }
       }
