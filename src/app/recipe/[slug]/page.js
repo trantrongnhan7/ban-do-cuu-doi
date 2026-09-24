@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
   if (!dish) return { title: 'Không tìm thấy món ăn' }
 
   const imageUrl = dish.image
-    ? urlFor(dish.image).width(1200).height(630).url()
+    ? urlFor(dish.image).width(1200).height(630).format('jpg').url()
     : 'https://bandovigiac.vercel.app/hero-banner.jpg'
 
   return {
