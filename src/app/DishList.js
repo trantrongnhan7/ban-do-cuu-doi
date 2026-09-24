@@ -139,8 +139,6 @@ export function DishList({ dishes }) {
     } else {
       matchesRegion =
         selectedRegion === 'all' ||
-        dish.region === 'ca-3-mien' ||
-        dish.region === 'Cả 3 Miền' ||
         dish.region === selectedRegion ||
         (selectedRegion === 'bac' && (dish.region === 'Miền Bắc' || dish.region === 'mien-bac')) ||
         (selectedRegion === 'trung' && (dish.region === 'Miền Trung' || dish.region === 'mien-trung')) ||
