@@ -1,6 +1,10 @@
 import { Be_Vietnam_Pro, Comfortaa, Space_Mono } from 'next/font/google'
 import './globals.css'
 import BackgroundAmbience from '../components/BackgroundAmbience'
+import { getSiteUrl } from '@/lib/getSiteUrl'
+
+const siteUrl = getSiteUrl()
+
 // 1. Font Comfortaa cho tiêu đề bo tròn
 const comfortaa = Comfortaa({
   subsets: ['vietnamese', 'latin'],
@@ -23,7 +27,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 })
 
 export const metadata = {
-  metadataBase: new URL('https://bandovigiac.vercel.app'),
+  metadataBase: new URL(siteUrl),
   title: 'Bản Đồ Cứu Đói 🥢 | Khám Phá Ẩm Thực Việt Nam 3 Miền',
   description:
     'Bản đồ vị giác 3 miền: Lưu giữ hương vị xưa bằng góc nhìn mới. Gợi ý món ăn thông minh theo thời tiết, vị trí và vòng quay Gacha ẩm thực.',
@@ -36,14 +40,14 @@ export const metadata = {
   ],
   authors: [{ name: 'Bản Đồ Cứu Đói' }],
   openGraph: {
-    title: 'Bản Đồ Cứu Đói 🥢 | Hôm nay ăn gì?',
+    title: 'Bản Đồ Cứu Đói 🥢 | Vị giác 3 miền',
     description:
       'Gợi ý món ăn chuẩn vị 3 miền theo thời tiết & tâm trạng. Bấm vòng quay Gacha để giải quyết câu hỏi "Hôm nay ăn gì?" ngay lập tức!',
-    url: 'https://bandovigiac.vercel.app',
+    url: siteUrl,
     siteName: 'Bản Đồ Cứu Đói',
     images: [
       {
-        url: 'https://bandovigiac.vercel.app/hero-banner.jpg',
+        url: `${siteUrl}/hero-banner.jpg`,
         width: 1200,
         height: 630,
         alt: 'Bản Đồ Cứu Đói - Ẩm Thực Việt Nam',
@@ -56,7 +60,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Bản Đồ Cứu Đói 🥢',
     description: 'Bản đồ vị giác 3 miền & Gacha gợi ý món ăn chuẩn thời tiết.',
-    images: ['https://bandovigiac.vercel.app/hero-banner.jpg'],
+    images: [`${siteUrl}/hero-banner.jpg`],
   },
 }
 
