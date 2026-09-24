@@ -9,7 +9,6 @@ import WeatherWidget from '@/components/WeatherWidget'
 import TrendingWidget from '@/components/TrendingWidget'
 import TrendingBar from '@/components/TrendingBar'
 
-
 export function DishList({ dishes }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('all')
@@ -50,7 +49,8 @@ export function DishList({ dishes }) {
       console.error('Không thể lưu bookmark vào localStorage', e)
     }
   }
-// Hàm xử lý copy link bài viết
+
+  // Hàm xử lý copy link bài viết
   const handleShareDish = (dish, e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -65,6 +65,7 @@ export function DishList({ dishes }) {
       })
     }
   }
+
   // Lọc danh sách món ăn an toàn, chống crash trang web
   const filteredDishes = dishes.filter((dish) => {
     if (!dish) return false
@@ -73,15 +74,12 @@ export function DishList({ dishes }) {
     const matchesVibe =
       !selectedVibe ||
       (() => {
-        // Lấy danh sách Khung Giờ an toàn (tránh bị undefined/null)
         const timesData = dish.timeOfDay || dish.mealTime || dish.suitableTime || []
         const times = Array.isArray(timesData) ? timesData : [timesData]
 
-        // Lấy danh sách Ngữ Cảnh Vibe an toàn
         const occasionsData = dish.occasion || []
-        const occasions = Array.isArray(occasionsData) ? occasionsData : [occasionsData]        
+        const occasions = Array.isArray(occasionsData) ? occasionsData : [occasionsData]
 
-        // Lọc Khung Giờ
         if (selectedVibe === 'sang') {
           return times.some((t) => t && (t === 'sang' || t === 'Sáng'))
         }
@@ -97,7 +95,6 @@ export function DishList({ dishes }) {
           )
         }
 
-        // Lọc Ngữ Cảnh Vibe
         if (selectedVibe === 'chaytui') {
           return occasions.some(
             (o) => o && (o === 'cuoi-thang-chay-tui' || o === 'cuoithang')
@@ -132,18 +129,21 @@ export function DishList({ dishes }) {
       dish.tasteProfiles?.some((taste) => taste && taste.toLowerCase().includes(query)) ||
       dish.ingredients?.some((ing) => ing && ing.toLowerCase().includes(query))
 
-    // 3. Lọc theo Vùng miền / Đã lưu
+    // 3. Lọc theo Vùng miền / Đã lưu (Đã sửa chuẩn hóa so sánh chữ thường & nhãn)
     let matchesRegion = true
     if (selectedRegion === 'saved') {
       matchesRegion = bookmarkedIds.includes(dish._id)
+    } else if (selectedRegion === 'ca-3-mien') {
+      matchesRegion = dish.region === 'Cả 3 Miền' || dish.region === 'ca-3-mien'
+    } else if (selectedRegion === 'bac') {
+      matchesRegion = dish.region === 'Miền Bắc' || dish.region === 'mien-bac'
+    } else if (selectedRegion === 'trung') {
+      matchesRegion = dish.region === 'Miền Trung' || dish.region === 'mien-trung'
+    } else if (selectedRegion === 'nam') {
+      matchesRegion = dish.region === 'Miền Nam' || dish.region === 'mien-nam'
     } else {
-      matchesRegion =
-        selectedRegion === 'all' ||
-        dish.region === selectedRegion ||
-        (selectedRegion === 'ca-3-mien' && (dish.region === 'Cả 3 Miền' || dish.region === 'ca-3-mien')) ||
-        (selectedRegion === 'bac' && (dish.region === 'Miền Bắc' || dish.region === 'mien-bac')) ||
-        (selectedRegion === 'trung' && (dish.region === 'Miền Trung' || dish.region === 'mien-trung')) ||
-        (selectedRegion === 'nam' && (dish.region === 'Miền Nam' || dish.region === 'mien-nam'))
+      // selectedRegion === 'all'
+      matchesRegion = true
     }
 
     // 4. Lọc theo Hashtag đang chọn
@@ -157,7 +157,7 @@ export function DishList({ dishes }) {
 
   return (
     <main className="relative min-h-screen bg-[#fbf8f2] py-12 px-4 sm:px-6 lg:px-8">
-      {/* NỀN ẢNH ẨM THỰC PHỦ TOÀN BỘ TRANG WEB (CỐ ĐỊNH KHI CUỘN) */}
+      {/* NỀN ẢNH ẨM THỰC PHỦ TOÀN BỘ TRANG WEB */}
       <WeatherWidget onSelectCategory={(vibe) => setSelectedVibe(vibe)} />
       <TrendingWidget dishes={dishes} />
       <div
@@ -165,11 +165,9 @@ export function DishList({ dishes }) {
         style={{ backgroundImage: "url('/dao-ly-son.png')" }}
       />
 
-      {/* KHỐI HEADER GIỮ NGUYÊN */}
+      {/* KHỐI HEADER */}
       <header className="relative max-w-4xl mx-auto mb-10 overflow-hidden rounded-3xl bg-amber-100/60 p-6 sm:p-8 border border-amber-200/80 shadow-xs z-10">
-
         <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Giữ nguyên màu chữ nâu mộc mạc cũ */}
           <div className="text-center sm:text-left">
             <h1 className="font-[family-name:var(--font-playful)] text-3xl sm:text-5xl font-black text-amber-950 mb-2">
               🥢 Bản Đồ Cứu Đói 🍺
@@ -178,8 +176,7 @@ export function DishList({ dishes }) {
               &gt; Bản đồ vị giác 3 miền: Lưu giữ hương vị xưa bằng góc nhìn mới_
             </p>
           </div>
-          
-          {/* Logo Huy Hiệu bo tròn đặt bên phải gọn gàng, không che chữ */}
+
           <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full overflow-hidden border-2 border-amber-300 shadow-sm bg-white p-1 hidden sm:block">
             <img
               src="/hero-banner.jpg"
@@ -190,7 +187,7 @@ export function DishList({ dishes }) {
         </div>
       </header>
 
-        {/* 🟢 DÃY TOP 1-4 NẰM ĐÚNG VỊ TRÍ NÀY (BÊN NGOÀI HEADER, TRÊN THANH TÌM KIẾM) */}
+      {/* DÃY TOP 1-4 */}
       <TrendingBar dishes={dishes} />
 
       {/* Thanh Tìm kiếm & Bộ lọc Vùng miền + Bookmark */}
@@ -220,7 +217,7 @@ export function DishList({ dishes }) {
             <button
               key={tab.id}
               onClick={() => setSelectedRegion(tab.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                 selectedRegion === tab.id
                   ? 'bg-amber-800 text-white shadow-md shadow-amber-900/20 scale-105'
                   : 'bg-white text-amber-800 hover:bg-amber-100/70 border border-amber-200/60'
@@ -231,8 +228,7 @@ export function DishList({ dishes }) {
           ))}
         </div>
 
-
-        {/* 👈 BỘ LỌC TÌNH HUỐNG CỨU ĐÓI (VIBE FILTER) */}
+        {/* BỘ LỌC TÌNH HUỐNG CỨU ĐÓI (VIBE FILTER) */}
         <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
           {[
             { id: 'chaytui', label: '💸 Cuối Tháng Cháy Túi' },
@@ -243,7 +239,7 @@ export function DishList({ dishes }) {
             <button
               key={vibe.id}
               onClick={() => setSelectedVibe(selectedVibe === vibe.id ? null : vibe.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border cursor-pointer ${
                 selectedVibe === vibe.id
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-400 shadow-sm scale-105'
                   : 'bg-white/80 text-amber-900 border-amber-200/80 hover:bg-amber-100/60'
@@ -253,8 +249,8 @@ export function DishList({ dishes }) {
             </button>
           ))}
         </div>
-        
-         {/* 🟢 CHÈN NÚT RESET FILTER (BỎ LỌC THỜI TIẾT / KHUNG GIỜ / VIBE) VÀO ĐÂY */}
+
+        {/* NÚT RESET FILTER */}
         {selectedVibe && (
           <div className="flex items-center justify-center gap-2 pt-2 animate-fade-in">
             <span className="text-xs text-amber-800 font-medium">
@@ -269,8 +265,8 @@ export function DishList({ dishes }) {
             </button>
           </div>
         )}
-        
-        {/* Hiển thị Tag đang được chọn (nếu có) */}
+
+        {/* Hiển thị Tag đang chọn */}
         {selectedTag && (
           <div className="flex items-center justify-center gap-2 pt-2 animate-fade-in">
             <span className="text-xs text-amber-800 font-medium">Đang lọc theo tag:</span>
@@ -278,7 +274,7 @@ export function DishList({ dishes }) {
               #{selectedTag}
               <button
                 onClick={() => setSelectedTag(null)}
-                className="hover:bg-amber-700 w-4 h-4 rounded-full flex items-center justify-center text-xs ml-0.5"
+                className="hover:bg-amber-700 w-4 h-4 rounded-full flex items-center justify-center text-xs ml-0.5 cursor-pointer"
                 title="Bỏ lọc tag"
               >
                 ✕
@@ -294,6 +290,8 @@ export function DishList({ dishes }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDishes.map((dish) => {
               const isSaved = bookmarkedIds.includes(dish._id)
+              const dishSlug = typeof dish.slug === 'string' ? dish.slug : dish.slug?.current || dish._id
+
               return (
                 <article
                   key={dish._id}
@@ -301,8 +299,9 @@ export function DishList({ dishes }) {
                 >
                   {/* Hình ảnh & Nút Thả Tim */}
                   <Link
-                    href={`/recipe/${dish.slug?.current || dish.slug}`}
-                    className="relative block h-48 w-full overflow-hidden bg-amber-100 cursor-pointer group/img">
+                    href={`/recipe/${dishSlug}`}
+                    className="relative block h-48 w-full overflow-hidden bg-amber-100 cursor-pointer group/img"
+                  >
                     {(dish.imageUrl || dish.image) && (
                       <Image
                         src={dish.imageUrl || urlFor(dish.image).url()}
@@ -312,22 +311,22 @@ export function DishList({ dishes }) {
                       />
                     )}
                     <span className="absolute top-3 right-3 bg-amber-950/70 backdrop-blur-md text-amber-100 text-xs px-2.5 py-1 rounded-full border border-amber-700/30 font-medium z-10">
-                       {dish.region === 'ca-3-mien' || dish.region === 'Cả 3 Miền'
-                         ? 'Cả 3 Miền'
-                       : dish.region === 'mien-bac' || dish.region === 'Miền Bắc'
-                      ? 'Miền Bắc'
-                       : dish.region === 'mien-trung' || dish.region === 'Miền Trung'
-                       ? 'Miền Trung'
-                       : dish.region === 'mien-nam' || dish.region === 'Miền Nam'
-                      ? 'Miền Nam'
-                       : dish.region || 'Cả 3 Miền'}
-                     </span>
+                      {dish.region === 'ca-3-mien' || dish.region === 'Cả 3 Miền'
+                        ? 'Cả 3 Miền'
+                        : dish.region === 'mien-bac' || dish.region === 'Miền Bắc'
+                        ? 'Miền Bắc'
+                        : dish.region === 'mien-trung' || dish.region === 'Miền Trung'
+                        ? 'Miền Trung'
+                        : dish.region === 'mien-nam' || dish.region === 'Miền Nam'
+                        ? 'Miền Nam'
+                        : dish.region || 'Cả 3 Miền'}
+                    </span>
 
                     {/* Nút Bookmark Thả Tim ❤️ */}
                     <button
                       onClick={(e) => toggleBookmark(dish._id, e)}
                       title={isSaved ? 'Bỏ lưu món ăn' : 'Lưu món ăn vào sổ tay'}
-                      className={`absolute top-3 left-3 z-10 w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
+                      className={`absolute top-3 left-3 z-10 w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 cursor-pointer ${
                         isSaved
                           ? 'bg-rose-500 text-white shadow-lg scale-110'
                           : 'bg-white/80 hover:bg-white text-gray-400 hover:text-rose-500 shadow-sm'
@@ -338,11 +337,11 @@ export function DishList({ dishes }) {
                       </span>
                     </button>
 
-                    {/* Nút Chia Sẻ Link Món Ăn */}
+                    {/* Nút Chia Sẻ Link */}
                     <button
                       onClick={(e) => handleShareDish(dish, e)}
                       title="Chia sẻ món ăn này"
-                      className="absolute bottom-3 right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center bg-white/80 hover:bg-white text-gray-600 hover:text-amber-600 backdrop-blur-md shadow-sm transition-all active:scale-125"
+                      className="absolute bottom-3 right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center bg-white/80 hover:bg-white text-gray-600 hover:text-amber-600 backdrop-blur-md shadow-sm transition-all active:scale-125 cursor-pointer"
                     >
                       <span className="text-sm">
                         {copiedDishId === dish._id ? '✅' : '🔗'}
@@ -368,7 +367,7 @@ export function DishList({ dishes }) {
                       </p>
                     </div>
 
-                    {/* Render danh sách Hashtags (Ưu tiên mảng hashtags từ Taxonomy) */}
+                    {/* Render danh sách Hashtags */}
                     <div>
                       <div className="flex flex-wrap gap-1.5 mb-4">
                         {(dish.hashtags || dish.tags)?.map((tag, idx) => (
@@ -386,7 +385,7 @@ export function DishList({ dishes }) {
                         ))}
                       </div>
                       <Link
-                        href={`/recipe/${dish.slug || dish._id}`}
+                        href={`/recipe/${dishSlug}`}
                         className="text-xs font-bold text-amber-800 group-hover:text-amber-600 flex items-center gap-1 transition-colors font-[family-name:var(--font-mono)]"
                       >
                         Xem Thêm -&gt;
@@ -410,7 +409,7 @@ export function DishList({ dishes }) {
                 ? 'Bạn chưa lưu món ăn nào!'
                 : 'Bếp hết món này rồi bạn ơi!'}
             </h3>
-            
+
             <p className="text-amber-800/80 text-sm max-w-sm mx-auto leading-relaxed italic mb-4">
               {selectedRegion === 'saved'
                 ? 'Hãy bấm vào biểu tượng trái tim 🤍 ở góc từng món ăn để lưu lại món bạn yêu thích nhé!'
@@ -420,7 +419,7 @@ export function DishList({ dishes }) {
             {selectedTag && (
               <button
                 onClick={() => setSelectedTag(null)}
-                className="inline-block text-xs font-bold bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition-colors shadow-sm"
+                className="inline-block text-xs font-bold bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition-colors shadow-sm cursor-pointer"
               >
                 Bỏ lọc #{selectedTag} ✕
               </button>
